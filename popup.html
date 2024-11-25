@@ -10,34 +10,66 @@
             font-family: Arial, sans-serif;
         }
 
-        .timer-input {
-            width: 100%;
-            margin: 10px 0;
+        .button-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
         }
 
-        button {
-            width: 100%;
-            padding: 8px;
-            background: #4CAF50;
-            color: white;
-            border: none;
+        .preset-button {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            color: #333;
+            border: 2px solid #9e9e9e;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
         }
 
-        button:hover {
-            background: #45a049;
+        .preset-button:hover {
+            background: #4CAF50;
+            border-color: #45a049;
+            color: white;
+        }
+
+        .custom-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #9e9e9e;
+            border-radius: 4px;
+        }
+
+        .timer-input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        label {
+            color: #666;
+            font-size: 14px;
         }
     </style>
 </head>
 
 <body>
     <h2>🦢 Productive Goose</h2>
-    <div>
-        <label for="breakTime">Break Timer (minutes):</label>
-        <input type="number" id="breakTime" class="timer-input" min="1" max="60" value="10">
+    <div class="button-container">
+        <button class="preset-button">30 minutes</button>
+        <button class="preset-button">1 hour</button>
+        <button class="preset-button">2 hours</button>
     </div>
-    <button id="startTimer">Start Timer</button>
+    <div class="custom-time">
+        <label for="breakTime">Custom time (minutes):</label>
+        <input type="number" id="breakTime" class="timer-input" min="1" max="720" value="10">
+    </div>
     <script src="popup.js"></script>
 </body>
 

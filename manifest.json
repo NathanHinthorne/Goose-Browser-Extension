@@ -7,15 +7,15 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "images/goose16.png",
-      "48": "images/goose48.png",
-      "128": "images/goose128.png"
+      "31": "images/goose31.png",
+      "62": "images/goose62.png",
+      "124": "images/goose124.png"
     }
   },
   "icons": {
-    "16": "images/goose16.png",
-    "48": "images/goose48.png",
-    "128": "images/goose128.png"
+    "31": "images/goose31.png",
+    "62": "images/goose62.png",
+    "124": "images/goose124.png"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],

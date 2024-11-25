@@ -5,9 +5,13 @@ class Goose {
     this.walking = false;
     this.pranksEnabled = false;
     this.memes = [
-      'honk.jpg',
+      'deal-with-it.jpg',
+      'goose-murder.jpg',
+      'hammer.jpg',
+      'mess-with-the-honk.jpg',
       'peace-was-never-an-option.jpg',
-      'desktop-goose.jpg'
+      'peaking.jpg',
+      'take-break-cat.jpg'
     ];
     
     this.setupTimer();
@@ -97,6 +101,7 @@ class Goose {
   walk() {
     if (this.walking) return;
     
+    console.log('GOOSE WALKING');
     this.walking = true;
     const walkInterval = setInterval(() => {
       if (!this.walking) {
