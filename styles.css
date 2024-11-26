@@ -1,7 +1,10 @@
 .goose {
+    image-rendering: pixelated; /* Modern browsers */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: crisp-edges; /* Safari */
     position: fixed;
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
     z-index: 9999;
     pointer-events: none;
     transition: all 0.5s ease;

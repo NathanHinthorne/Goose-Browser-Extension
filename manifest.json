@@ -2,20 +2,23 @@
   "manifest_version": 3,
   "name": "Productive Goose",
   "version": "1.0",
-  "description": "A playful goose that encourages taking breaks",
+  "description": "A playful goose that 'encourages' taking breaks with some crazy antics.",
   "permissions": ["tabs", "storage", "alarms"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "31": "images/goose31.png",
-      "62": "images/goose62.png",
-      "124": "images/goose124.png"
+      "31": "images/ui/goose31.png",
+      "62": "images/ui/goose62.png",
+      "124": "images/ui/goose124.png"
     }
   },
+  "background": {
+    "service_worker": "background.js"
+  },
   "icons": {
-    "31": "images/goose31.png",
-    "62": "images/goose62.png",
-    "124": "images/goose124.png"
+    "31": "images/ui/goose31.png",
+    "62": "images/ui/goose62.png",
+    "124": "images/ui/goose124.png"
   },
   "content_scripts": [{
     "matches": ["<all_urls>"],

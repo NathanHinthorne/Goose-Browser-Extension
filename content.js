@@ -1,8 +1,14 @@
+/**
+ * Goose 🪿
+ */
 class Goose {
   constructor() {
-    this.position = { x: 0, y: 0 };
+    this.position = { 
+      x: window.innerWidth / 2 + (Math.random() - 0.5) * 100, 
+      y: window.innerHeight / 2 + (Math.random() - 0.5) * 100 
+    };
     this.element = this.createGoose();
-    this.walking = false;
+    this.action = 'walking';
     this.pranksEnabled = false;
     this.memes = [
       'deal-with-it.jpg',
@@ -99,12 +105,12 @@ class Goose {
   }
 
   walk() {
-    if (this.walking) return;
+    if (this.action === 'walking') return;
     
     console.log('GOOSE WALKING');
-    this.walking = true;
+    this.action = 'walking';
     const walkInterval = setInterval(() => {
-      if (!this.walking) {
+      if (this.action != 'walking') {
         clearInterval(walkInterval);
         return;
       }
@@ -132,4 +138,4 @@ class Goose {
 
 // Initialize goose when page loads
 const goose = new Goose();
-goose.walk();
+// goose.walk();
