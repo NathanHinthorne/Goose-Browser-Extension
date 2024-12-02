@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Productive Goose",
+  "name": "Annoying Goose",
   "version": "1.0",
-  "description": "A playful goose that 'encourages' taking breaks with some crazy antics.",
+  "description": "A playful goose that encourages taking breaks with some crazy antics.",
   "permissions": ["tabs", "storage", "alarms"],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -23,7 +26,13 @@
   "content_scripts": [{
     "matches": ["<all_urls>"],
     "css": ["styles.css"],
-    "js": ["content.js"]
+      "js": [
+        "goose.js",
+        "gooseStates.js",
+        "content.js"
+      ],
+    "all_frames": true,
+    "run_at": "document_start"
   }],
   "web_accessible_resources": [{
     "resources": ["images/*", "sounds/*"],

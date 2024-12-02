@@ -11,9 +11,9 @@ function clearBadge() {
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "startTimer") {
+  if (request.action === "startGoose") {
     setActiveBadge();
-  } else if (request.action === "stopTimer") {
+  } else if (request.action === "stopGoose") {
     clearBadge();
   }
 });

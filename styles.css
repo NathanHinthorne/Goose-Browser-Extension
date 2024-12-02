@@ -3,11 +3,10 @@
     image-rendering: -moz-crisp-edges; /* Firefox */
     image-rendering: crisp-edges; /* Safari */
     position: fixed;
-    width: 64px;
-    height: 64px;
     z-index: 9999;
     pointer-events: none;
     transition: all 0.5s ease;
+    background-repeat: no-repeat;
 }
 
 .goose-meme {

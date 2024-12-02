@@ -4,12 +4,11 @@
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- DynaPuff -->
     <link
         href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=DynaPuff:wght@400..700&family=Handlee&display=swap"
         rel="stylesheet">
 
-    <title>Productive Goose</title>
+    <title>Annoying Goose</title>
     <style>
         :root {
             --primary-color: #efb934;
@@ -39,7 +38,7 @@
         .corner-goose {
             bottom: 0;
             right: 0;
-            width: 64px;
+            width: 80px;
         }
 
         .footprints {
@@ -100,10 +99,11 @@
         }
 
         .start-button:disabled,
-        .stop-button:disabled {
+        .stop-button:disabled,
+        .preset-button:disabled {
             background: #ccc;
             border-color: #bbb;
-            color: #666;
+            color: #a5a5a5;
             cursor: not-allowed;
         }
 
@@ -135,7 +135,7 @@
 <body>
     <img src="images/ui/perfect-goose.png" class="corner-goose" alt="goose">
     <img src="images/ui/footprints4.png" class="footprints" alt="footprints">
-    <h2>Productive Goose</h2>
+    <h2>Annoying Goose</h2>
     <div class="button-container">
         <button class="preset-button">30 minutes</button>
         <button class="preset-button">1 hour</button>
