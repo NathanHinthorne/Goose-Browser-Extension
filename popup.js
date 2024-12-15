@@ -54,6 +54,7 @@ document.getElementById('startButton').addEventListener('click', () => {
     });
     document.getElementById('stopButton').disabled = false;
     document.getElementById('startButton').disabled = true;
+    chrome.runtime.sendMessage({ action: "startTimer" });
     window.close();
 });
 

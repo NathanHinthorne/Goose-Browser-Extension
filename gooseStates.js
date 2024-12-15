@@ -12,9 +12,6 @@ class GooseState {
     goose.distanceToTarget = 0;
 
     // Defaults
-    goose.frameDuration = 300;
-    goose.currentFrame = 0;
-    goose.lastFrameTime = 0;
     goose.speed = 0;
   }
 
@@ -49,7 +46,7 @@ class GooseState {
       
       this.goose.position.x = boundedX;
       this.goose.position.y = boundedY;
-      
+
       this.goose.element.style.left = boundedX + 'px';
       this.goose.element.style.top = boundedY + 'px';
       
@@ -63,16 +60,19 @@ class GooseState {
       );
 
       if (this.goose.distanceToTarget < 10) {
-        console.log("REACHED TARGET. choosing new target...")
+        console.log("GOOSE REACHED TARGET");
         this.setNewTarget();
-        this.moveToTarget();
       }
+
+      requestAnimationFrame( move );
     };
 
     this.goose.isMoving = true;
+    requestAnimationFrame( move );
   }
 
   setNewTarget() {
+    console.log("Setting new target...");
     this.goose.targetPos = {
       x: Math.random() * (window.innerWidth - 50),
       y: Math.random() * (window.innerHeight - 50)
@@ -86,8 +86,7 @@ class GooseState {
 
 class IdleState extends GooseState {
   enter() {
-    this.goose.setAnimation('idle');
-    this.goose.startAnimation();
+    this.goose.playAnimation('idle');
   }
 
   exit() {
@@ -98,14 +97,12 @@ class IdleState extends GooseState {
 class WanderState extends GooseState {
   constructor(goose) {
     super(goose);
-    this.goose.frameDuration = 300;
-    this.goose.speed = 0;
+    this.goose.speed = 0.8;
   }
 
   enter() {
     console.log("Entering Wander State");
-    this.goose.setAnimation('walking');
-    this.goose.startAnimation();
+    this.goose.playAnimation('walking');
     this.setNewTarget();
     this.moveToTarget();
   }
@@ -121,19 +118,13 @@ class WanderState extends GooseState {
 class ChaseState extends GooseState {
   constructor(goose) {
     super(goose);
-    this.goose.frameDuration = 300;
-    this.goose.speed = 2.5;
+    this.goose.speed = 2;
   }
 
   enter() {
-    this.goose.setAnimation('running');
-    this.goose.startAnimation();
+    this.goose.playAnimation('running');
     this.setNewTarget();
     this.moveToTarget();
-  }
-
-  update() {
-    
   }
 
   exit() {

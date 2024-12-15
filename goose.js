@@ -20,75 +20,62 @@ class Goose {
     };
     this.pranksEnabled = false;
     this.currentFrame = 0;
-
-    // Memes and sound effects
-    this.memes = [
-      'deal-with-it.jpg',
-      'goose-murder.jpg',
-      'hammer.jpg',
-      'mess-with-the-honk.jpg',
-      'peace-was-never-an-option.jpg',
-      'peaking.jpg',
-      'take-break-cat.jpg'
-    ];
-
-    this.sfx = {
-      honk: new Audio(chrome.runtime.getURL('sounds/honk.mp3')),
-      honkEcho: new Audio(chrome.runtime.getURL('sounds/honk-echo.mp3'))
-    };
-
-    // Animation states
-    this.animationStates = {
-      idle: { row: 0, frames: 4 },
-      walking: { row: 1, frames: 4 },
-      running: { row: 2, frames: 4 },
-      flying: { row: 3, frames: 4 },
-      shooed: { row: 5, frames: 4 }
-    };
+    this.animationId = null; // animation ID for requestAnimationFrame
+    this.currentAnimation = 'idle';
 
     this.frameWidth = 32;
     this.frameHeight = 32;
     this.scaleFactor = 2;
+    this.displayWidth = this.frameWidth * this.scaleFactor;
+    this.displayHeight = this.frameHeight * this.scaleFactor;
 
     this.element = this.createGoose();
+    this.shadow = this.createShadow();
 
-    // Bind methods
-    this.setAnimation = this.setAnimation.bind(this);
-
-    // Add frame update rate control
-    this.animationFrameRate = 100; // milliseconds between frame changes
     this.lastFrameTime = 0;
-
-
-    this.doneCaching = false;
-    this.frameCache = new Map();
-    
-    this.tempCanvas = document.createElement('canvas');
-    this.tempCanvas.width = this.frameWidth;
-    this.tempCanvas.height = this.frameHeight;
-    this.tempCtx = this.tempCanvas.getContext('2d', { 
-      willReadFrequently: true 
-    });
-
-    // Don't start animation until explicitly called
-    this.loadAndCache();
   }
 
-  async loadAndCache() {
-    await this.loadSpriteSheet();
-    await this.cacheAllFrames();
-    this.doneCaching = true;
-    this.startAnimation();
+  createShadow() {
+    let existingShadow = document.querySelector('.goose-shadow');
+    if (existingShadow) {
+        return existingShadow;
+    }
+
+    const shadow = document.createElement('div');
+    shadow.className = 'goose-shadow';
+    shadow.style.position = 'fixed';
+    shadow.style.width = `${this.displayWidth * 0.8}px`; // Slightly smaller than goose
+    shadow.style.height = `${this.displayHeight * 0.3}px`; // Flatter than goose
+    shadow.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'; // Translucent black
+    shadow.style.borderRadius = '50%'; // Make it oval
+    shadow.style.transform = `translate(${this.position.x}px, ${this.position.y + this.displayHeight - 5}px)`; // Position slightly below goose
+    shadow.style.zIndex = '9997'; // Below the goose
+    shadow.style.willChange = 'transform';
+    document.body.appendChild(shadow);
+
+    console.log("created shadow");
+
+    return shadow;
+  }
+
+  updateShadow() {
+    if (this.shadow) {
+        this.shadow.style.transform = 
+            `translate(${this.position.x + this.displayWidth * 0.1}px, 
+            ${this.position.y + this.displayHeight - 5}px)`;
+    }
   }
 
   // State transition method
-  setAction(newAction) {
+  setState(newState) {
     if (this.currentState?.exit) {
       this.currentState.exit();
     }
 
-    this.currentState = this.states[newAction];
-    this.action = newAction;
+    this.playSFX(assets.sounds.honk);
+
+    this.currentState = this.states[newState];
+    console.log( "currentState: ", this.currentState );
     this.element.style.display = 'block';
 
     if (this.currentState?.enter) {
@@ -96,108 +83,69 @@ class Goose {
     }
   }
 
-  // Sprite sheet and animation method
-  async loadSpriteSheet() {
-    return new Promise((resolve, reject) => {
-      this.spriteSheet = new Image();
-      this.spriteSheet.onload = () => {
-        this.displayWidth = this.frameWidth * this.scaleFactor;
-        this.displayHeight = this.frameHeight * this.scaleFactor;
-        resolve();
-      };
-      this.spriteSheet.onerror = reject;
-      this.spriteSheet.src = chrome.runtime.getURL('images/goose-spritesheet.png');
-    });
-  }
+  playAnimation(animation) {    
+    this.currentAnimation = animation;
+    this.currentFrame = 0;
+    this.lastFrameTime = 0;
+    let lastTimestamp = 0;
 
-  async cacheAllFrames() {
-    Object.entries(this.animationStates).forEach(([stateName, state]) => {
-      for (let frame = 0; frame < state.frames; frame++) {
-        const key = `${stateName}-${frame}`;
-        this.tempCtx.clearRect(0, 0, this.frameWidth, this.frameHeight);
-        this.tempCtx.drawImage(
-          this.spriteSheet,
-          frame * this.frameWidth,
-          state.row * this.frameHeight,
-          this.frameWidth,
-          this.frameHeight,
-          0, 0,
-          this.frameWidth,
-          this.frameHeight
-        );
-        const dataUrl = this.tempCanvas.toDataURL();
-        this.frameCache.set(key, dataUrl);
-      }
-    });
-  }
+    const animationDetails = assets.spritesheet.animations[this.currentAnimation];
+    console.log( "animationDetails: ", animationDetails );
 
-  getMaxFrames() {
-    return Math.max(...Object.values(this.animationStates).map(state => state.frames));
-  }
-
-  startAnimation() {
-    if (this.currentFrame) return;
-    
     const animate = (timestamp) => {
+      const deltaTime = timestamp - lastTimestamp;
+      if (deltaTime > 16.67) { // More than 60fps
+          // console.warn('Slow frame:', deltaTime);
+      }
+      lastTimestamp = timestamp;
+
       // Only update frame if enough time has passed
-      if (!this.lastFrameTime || timestamp - this.lastFrameTime >= this.currentState.frameDuration) {
+      if (timestamp - this.lastFrameTime >= animationDetails.frameDuration) {
         this.updateFrame();
         this.renderFrame();
         this.lastFrameTime = timestamp;
       }
       
       // Continue the animation loop
-      this.currentFrame = requestAnimationFrame(animate);
+      this.animationId = requestAnimationFrame(animate);
     };
     
-    this.currentFrame = requestAnimationFrame(animate);
+    this.animationId = requestAnimationFrame(animate);
   }
 
   stopAnimation() {
-    if (this.currentFrame) {
-      cancelAnimationFrame(this.currentFrame);
-      this.currentFrame = null;
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
   }
 
   updateFrame() {
-    const currentState = this.animationStates[this.action];
+    const animationDetails = assets.spritesheet.animations[this.currentAnimation];
     
     // Increment frame, wrapping around state-specific frame count
-    this.currentFrame = (this.currentFrame + 1) % currentState.frames;
+    this.currentFrame = (this.currentFrame + 1) % animationDetails.frames;
+    // console.log("Current frame: ", this.currentFrame);
   }
 
   renderFrame() {
-    const currentState = this.animationStates[this.action];
-    
-    if (!this.element || !this.spriteSheet) return;
+    if (!this.element) return;
 
-    const key = `${this.action}-${this.currentFrame}`;
-    let frameImage = this.frameCache.get(key);
+    let frameImage = assets.getFrame(this.currentAnimation, this.currentFrame);
 
     if (!frameImage) {
-      // Fallback to direct rendering if cache miss
-      this.tempCtx.clearRect(0, 0, this.frameWidth, this.frameHeight);
-      this.tempCtx.drawImage(
-        this.spriteSheet,
-        this.currentFrame * this.frameWidth,
-        currentState.row * this.frameHeight,
-        this.frameWidth,
-        this.frameHeight,
-        0, 0,
-        this.frameWidth,
-        this.frameHeight
-      );
-      frameImage = this.tempCanvas.toDataURL();
-      this.frameCache.set(key, frameImage);
+      console.log("cache miss for frame: ", this.currentAnimation, this.currentFrame );
     }
+    // else {
+    //   console.log("Found frame: ", frameImage);
+    // }
 
-    this.element.style.width = `${this.displayWidth}px`;
-    this.element.style.height = `${this.displayHeight}px`;
     this.element.style.backgroundImage = `url(${frameImage})`;
-    this.element.style.backgroundSize = '100% 100%';
-    this.element.style.backgroundRepeat = 'no-repeat';
-    this.element.style.display = 'block';
+    // this.element.style.width = `${this.displayWidth}px`;
+    // this.element.style.height = `${this.displayHeight}px`;
+    this.element.style.transform = `translate(${this.position.x}px, ${this.position.y}px)`;
+
+    this.updateShadow(); // Update shadow position
   }
   
   // Utility methods
@@ -210,29 +158,34 @@ class Goose {
     const goose = document.createElement('div');
     goose.className = 'goose';
     goose.style.position = 'fixed';
-    goose.style.left = this.position.x + 'px';
-    goose.style.top = this.position.y + 'px';
+    // goose.style.left = this.position.x + 'px';
+    // goose.style.top = this.position.y + 'px';
+    goose.style.transform = 'translate(0, 0)';
+    goose.style.willChange = 'transform'; // Hint to browser for optimization
+
     goose.style.zIndex = '9999';
+    goose.style.width = `${this.displayWidth}px`;
+    goose.style.height = `${this.displayHeight}px`;
+    goose.style.backgroundSize = '100% 100%';
+    goose.style.backgroundRepeat = 'no-repeat';
     goose.style.display = 'none';
     document.body.appendChild(goose);
     return goose;
   }
 
-  setAnimation(action) {    
-    this.action = action;
-    this.currentFrame = 0;
-  }
-
+  /**
+   * @param {Object} sfx Sound object from assets.sounds
+   */
   async playSFX(sfx) {
     try {
-      await sfx.play();
+      await sfx.file.play();
     } catch (error) {
-      console.error('Error playing sound:', error);
+      console.error('Error playing sound:', error, "\nWas trying to play file: ", sfx.file, "at path:", sfx.path);
     }
   }
 
   delete() {
-    this.playSFX(this.sfx.honkEcho);
+    this.playSFX(assets.sounds.honkEcho);
 
     // Remove from DOM
     if (this.element) {
@@ -249,9 +202,12 @@ class Goose {
     window.goose = null;
     Goose.instance = null;
 
-    if (this.frameCache) {
-      this.frameCache.clear();
+    if (this.shadow) {
+        this.shadow.remove();
     }
+
+    // might not want to clear cache since goose will be used later
+    // assets.clearCache();
 
     // Any additional cleanup
     Object.keys(this).forEach(key => {
@@ -259,3 +215,112 @@ class Goose {
     });
   }
 }
+
+const assets = {
+  frameWidth: 32,
+  frameHeight: 32,
+  
+  spritesheet: {
+    path: 'images/goose-spritesheet.png',
+    image: null,
+    animations: {
+      idle: { row: 0, frames: 4, frameDuration: 700 },
+      walking: { row: 1, frames: 4, frameDuration: 200 }, 
+      running: { row: 2, frames: 4, frameDuration: 150 },
+      flying: { row: 3, frames: 4, frameDuration: 200 },
+      shooed: { row: 5, frames: 4, frameDuration: 150 }
+    }
+  },
+
+  sounds: {
+    honk: { path: 'sounds/honk.mp3', file: null },
+    honkEcho: { path: 'sounds/honk-echo.mp3', file: null },
+  },
+
+  memes: [
+    'deal-with-it.jpg',
+    'goose-morning.jpg',
+    'hammer.jpg',
+    'mess-with-the-honk.jpg',
+    'not-going-anywhere.jpg',
+    'peace-was-never-an-option.jpg',
+    'peaking.jpg',
+    'selfie.jpg',
+    'take-break-cat.jpg'
+  ],
+
+  frameCache: new Map(),
+  tempCanvas: document.createElement('canvas'),
+  tempCtx: null,
+
+  setupSounds() {
+    for (const sound in this.sounds) {
+      this.sounds[sound].file = new Audio(chrome.runtime.getURL(this.sounds[sound].path));
+    }
+  },
+
+  setupCanvas() {
+    this.tempCanvas.width = this.frameWidth;
+    this.tempCanvas.height = this.frameHeight;
+    this.tempCtx = this.tempCanvas.getContext('2d', { 
+      willReadFrequently: true 
+    });
+  },
+
+  async loadSpriteSheet() {
+    return new Promise((resolve, reject) => {
+      this.spritesheet.image = new Image();
+      this.spritesheet.image.onload = () => resolve(this.spritesheet.image);
+      this.spritesheet.image.onerror = reject;
+      this.spritesheet.image.src = chrome.runtime.getURL(this.spritesheet.path);
+    });
+  },
+
+  cacheAllFrames() {
+    Object.entries(this.spritesheet.animations).forEach(([stateName, state]) => {
+      for (let frame = 0; frame < state.frames; frame++) {
+        const key = `${stateName}-${frame}`;
+        this.tempCtx.clearRect(0, 0, this.frameWidth, this.frameHeight);
+        this.tempCtx.drawImage(
+          this.spritesheet.image,
+          frame * this.frameWidth,
+          state.row * this.frameHeight,
+          this.frameWidth,
+          this.frameHeight,
+          0, 0,
+          this.frameWidth,
+          this.frameHeight
+        );
+        const dataUrl = this.tempCanvas.toDataURL();
+        this.frameCache.set(key, dataUrl);
+      }
+    });
+  },
+
+  async initialize() {
+    try {
+      this.setupCanvas();
+      await this.loadSpriteSheet();
+      this.cacheAllFrames();
+      this.setupSounds();
+      console.log('Goose assets initialized successfully');
+      return this;
+    } catch (error) {
+      console.error('Failed to load goose assets:', error);
+      throw error;
+    }
+  },
+
+  getFrame(animation, frameNumber) {
+    const key = `${animation}-${frameNumber}`;
+    const frame = this.frameCache.get(key);
+    if (!frame) {
+        console.warn('Frame cache miss:', key);
+    }
+    return frame;
+  },
+
+  clearCache() {
+    this.frameCache.clear();
+  }
+};

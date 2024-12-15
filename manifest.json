@@ -27,15 +27,18 @@
     "matches": ["<all_urls>"],
     "css": ["styles.css"],
       "js": [
+        "content.js",
         "goose.js",
-        "gooseStates.js",
-        "content.js"
+        "gooseStates.js"
       ],
     "all_frames": true,
     "run_at": "document_start"
   }],
   "web_accessible_resources": [{
-    "resources": ["images/*", "sounds/*"],
+    "resources": [
+      "images/*", 
+      "sounds/*"
+    ],
     "matches": ["<all_urls>"]
   }]
 }
