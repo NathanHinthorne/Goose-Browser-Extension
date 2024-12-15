@@ -6,6 +6,29 @@ class Goose {
     }
     Goose.instance = this;
 
+    // Create the canvas
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.style.position = 'fixed';
+    this.canvas.style.top = '0';
+    this.canvas.style.left = '0';
+    this.canvas.style.width = '100vw';
+    this.canvas.style.height = '100vh';
+    this.canvas.style.zIndex = '9999';
+    this.canvas.style.pointerEvents = 'none'; // Prevent blocking user interaction
+
+    // Disable image smoothing for pixel art
+    this.ctx.imageSmoothingEnabled = false;       // Standard property
+    this.ctx.mozImageSmoothingEnabled = false;    // Firefox
+    this.ctx.webkitImageSmoothingEnabled = false; // Safari
+    this.ctx.msImageSmoothingEnabled = false;  
+
+    document.body.appendChild(this.canvas);
+
+    // Set canvas dimensions to match the viewport
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+
     // State management
     this.states = {
       idle: new IdleState(this),
@@ -29,41 +52,19 @@ class Goose {
     this.displayWidth = this.frameWidth * this.scaleFactor;
     this.displayHeight = this.frameHeight * this.scaleFactor;
 
-    this.element = this.createGoose();
-    this.shadow = this.createShadow();
-
     this.lastFrameTime = 0;
   }
 
-  createShadow() {
-    let existingShadow = document.querySelector('.goose-shadow');
-    if (existingShadow) {
-        return existingShadow;
-    }
-
-    const shadow = document.createElement('div');
-    shadow.className = 'goose-shadow';
-    shadow.style.position = 'fixed';
-    shadow.style.width = `${this.displayWidth * 0.8}px`; // Slightly smaller than goose
-    shadow.style.height = `${this.displayHeight * 0.3}px`; // Flatter than goose
-    shadow.style.backgroundColor = 'rgba(0, 0, 0, 0.8)'; // Translucent black
-    shadow.style.borderRadius = '50%'; // Make it oval
-    shadow.style.transform = `translate(${this.position.x}px, ${this.position.y + this.displayHeight - 5}px)`; // Position slightly below goose
-    shadow.style.zIndex = '9997'; // Below the goose
-    shadow.style.willChange = 'transform';
-    document.body.appendChild(shadow);
-
-    console.log("created shadow");
-
-    return shadow;
-  }
-
-  updateShadow() {
-    if (this.shadow) {
-        this.shadow.style.transform = 
-            `translate(${this.position.x + this.displayWidth * 0.1}px, 
-            ${this.position.y + this.displayHeight - 5}px)`;
-    }
+  resizeCanvas() {
+    // Set actual canvas resolution (backing store)
+    this.canvas.width = window.innerWidth * window.devicePixelRatio;
+    this.canvas.height = window.innerHeight * window.devicePixelRatio;
+    
+    // Scale the context to counter the resolution scaling
+    this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    // Reset image smoothing after context changes
+    this.ctx.imageSmoothingEnabled = false;
   }
 
   // State transition method
@@ -76,7 +77,6 @@ class Goose {
 
     this.currentState = this.states[newState];
     console.log( "currentState: ", this.currentState );
-    this.element.style.display = 'block';
 
     if (this.currentState?.enter) {
       this.currentState.enter();
@@ -86,30 +86,21 @@ class Goose {
   playAnimation(animation) {    
     this.currentAnimation = animation;
     this.currentFrame = 0;
-    this.lastFrameTime = 0;
-    let lastTimestamp = 0;
-
-    const animationDetails = assets.spritesheet.animations[this.currentAnimation];
-    console.log( "animationDetails: ", animationDetails );
+    this.lastFrameTime = performance.now();
 
     const animate = (timestamp) => {
-      const deltaTime = timestamp - lastTimestamp;
-      if (deltaTime > 16.67) { // More than 60fps
-          // console.warn('Slow frame:', deltaTime);
-      }
-      lastTimestamp = timestamp;
+      const deltaTime = timestamp - this.lastFrameTime;
 
-      // Only update frame if enough time has passed
-      if (timestamp - this.lastFrameTime >= animationDetails.frameDuration) {
-        this.updateFrame();
-        this.renderFrame();
+      const animationDetails = assets.spritesheet.animations[this.currentAnimation];
+      if (deltaTime >= animationDetails.frameDuration) {
+        this.currentFrame = (this.currentFrame + 1) % animationDetails.frames;
         this.lastFrameTime = timestamp;
       }
-      
-      // Continue the animation loop
+
+      this.drawFrame();
       this.animationId = requestAnimationFrame(animate);
     };
-    
+
     this.animationId = requestAnimationFrame(animate);
   }
 
@@ -120,58 +111,58 @@ class Goose {
     }
   }
 
-  updateFrame() {
-    const animationDetails = assets.spritesheet.animations[this.currentAnimation];
-    
-    // Increment frame, wrapping around state-specific frame count
-    this.currentFrame = (this.currentFrame + 1) % animationDetails.frames;
-    // console.log("Current frame: ", this.currentFrame);
+  drawFrame() {
+    const frameImage = assets.getFrame(this.currentAnimation, this.currentFrame);
+
+    // Clear the canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw the goose at its current position
+    const frameWidth = assets.frameWidth;
+    const frameHeight = assets.frameHeight;
+    const displayWidth = frameWidth * 2; // Scaled size
+    const displayHeight = frameHeight * 2;
+
+    const img = new Image();
+    img.src = frameImage;
+    this.ctx.drawImage(
+      img,
+      0,
+      0,
+      frameWidth,
+      frameHeight,
+      this.position.x - displayWidth / 2,
+      this.position.y - displayHeight / 2,
+      displayWidth,
+      displayHeight
+    );
+
+    console.log("goose position: ", this.position.x, this.position.y);
+
+    // Optional: Draw shadow
+    this.drawShadow();
   }
 
-  renderFrame() {
-    if (!this.element) return;
+  drawShadow() {
+    const shadowWidth = 40;
+    const shadowHeight = 12;
 
-    let frameImage = assets.getFrame(this.currentAnimation, this.currentFrame);
+    const yOffset = 30; // Adjust this value to control the shadow's height
 
-    if (!frameImage) {
-      console.log("cache miss for frame: ", this.currentAnimation, this.currentFrame );
-    }
-    // else {
-    //   console.log("Found frame: ", frameImage);
-    // }
-
-    this.element.style.backgroundImage = `url(${frameImage})`;
-    // this.element.style.width = `${this.displayWidth}px`;
-    // this.element.style.height = `${this.displayHeight}px`;
-    this.element.style.transform = `translate(${this.position.x}px, ${this.position.y}px)`;
-
-    this.updateShadow(); // Update shadow position
+    this.ctx.beginPath();
+    this.ctx.ellipse(
+      this.position.x,
+      this.position.y + yOffset,
+      shadowWidth / 2,
+      shadowHeight / 2,
+      0,
+      0,
+      2 * Math.PI
+    );
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    this.ctx.fill();
   }
-  
-  // Utility methods
-  createGoose() {
-    let existingGoose = document.querySelector('.goose');
-    if (existingGoose) {
-      return existingGoose;
-    }
 
-    const goose = document.createElement('div');
-    goose.className = 'goose';
-    goose.style.position = 'fixed';
-    // goose.style.left = this.position.x + 'px';
-    // goose.style.top = this.position.y + 'px';
-    goose.style.transform = 'translate(0, 0)';
-    goose.style.willChange = 'transform'; // Hint to browser for optimization
-
-    goose.style.zIndex = '9999';
-    goose.style.width = `${this.displayWidth}px`;
-    goose.style.height = `${this.displayHeight}px`;
-    goose.style.backgroundSize = '100% 100%';
-    goose.style.backgroundRepeat = 'no-repeat';
-    goose.style.display = 'none';
-    document.body.appendChild(goose);
-    return goose;
-  }
 
   /**
    * @param {Object} sfx Sound object from assets.sounds
@@ -187,11 +178,6 @@ class Goose {
   delete() {
     this.playSFX(assets.sounds.honkEcho);
 
-    // Remove from DOM
-    if (this.element) {
-      this.element.remove();
-    }
-
     // Stop any ongoing animations or intervals
     if (this.currentState && this.currentState.exit) {
       this.currentState.exit();
@@ -199,13 +185,11 @@ class Goose {
     this.stopAnimation();
 
     // Clear from window
-    window.goose = null;
     Goose.instance = null;
 
-    if (this.shadow) {
-        this.shadow.remove();
-    }
-
+    // erase everything from the ctx
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
     // might not want to clear cache since goose will be used later
     // assets.clearCache();
 
