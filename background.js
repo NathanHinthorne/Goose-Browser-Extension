@@ -1,39 +1,37 @@
 // fires when the extension is first installed or updated
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
-  triggerBrowserStartup();
+  triggerExtensionStartup();
 });
 
 // fires when entire browser first starts up
 chrome.runtime.onStartup.addListener(() => {
   console.log('Browser started');
-  triggerBrowserStartup();
+  triggerExtensionStartup();
 });
 
-function triggerBrowserStartup() {
-  // Send to all tabs
-  // chrome.tabs.query({}, (tabs) => {
-  //   tabs.forEach(tab => {
-  //     try {
-  //       chrome.tabs.sendMessage(tab.id, { command: "browserStartup" }, (response) => {
-  //         if (chrome.runtime.lastError) {
-  //           console.error('Error sending browserStartup:', chrome.runtime.lastError);
-  //         } else {
-  //           console.log('browserStartup message sent successfully');
-  //         }
-  //       });
-  //     } catch (error) {
-  //       console.error('Exception sending browserStartup:', error);
-  //     }
-  //   });
-  // });
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // React to tab updates
+  if (changeInfo.status === 'complete') {
+    // Tab finished loading
+    console.log('Tab loaded:', tab.url);
+    triggerExtensionStartup();
+  }
+});
 
-  // // Also send directly to runtime in case no tabs are open
-  // chrome.runtime.sendMessage({ command: "browserStartup" }, (response) => {
-  //   if (chrome.runtime.lastError) {
-  //     console.error('Error sending browserStartup to runtime:', chrome.runtime.lastError);
-  //   }
-  // });
+function triggerExtensionStartup() {
+  // Query for all tabs and send message to each
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach(tab => {
+      chrome.tabs.sendMessage(tab.id, { command: "extensionStartup" }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.log(`Tab ${tab.id} not ready yet`);
+          return;
+        }
+        console.log('Extension startup response:', response);
+      });
+    });
+  });
 }
 
 
@@ -63,14 +61,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // React to tab updates
-  if (changeInfo.status === 'complete') {
-    // Tab finished loading
-    console.log('Tab loaded:', tab.url);
-  }
-});
 
 // Handle alarms for scheduled tasks
 chrome.alarms.onAlarm.addListener((alarm) => {
