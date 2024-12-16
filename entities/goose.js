@@ -51,9 +51,6 @@ class Goose {
     // Clear from window
     Goose.instance = null;
     
-    // might not want to clear cache since goose will be used later
-    // assets.clearCache();
-
     // Any additional cleanup
     this.removeFromCanvas = true;
   }
@@ -62,6 +59,13 @@ class Goose {
   // === UPDATE/DRAW LOOP METHODS ===
 
   update() {
+    // console.log("x velocity: " + this.velocity.x);
+    if (this.velocity.x > 0) {
+      this.facing = "right";
+    } else {
+      this.facing = "left";
+    }
+
     // update logic should be handled by the current GooseState.
     // goose takes different actions based on its state.
     this.currentState.update();
@@ -163,10 +167,10 @@ class GooseState {
       if (!this.goose.isMoving) return;
 
       const currentPos = this.goose.position;
-      const velocity = this.calculateVelocity(currentPos, this.goose.targetPos);
+      this.goose.velocity = this.calculateVelocity(currentPos, this.goose.targetPos);
       
-      const newX = currentPos.x + velocity.x;
-      const newY = currentPos.y + velocity.y;
+      const newX = currentPos.x + this.goose.velocity.x;
+      const newY = currentPos.y + this.goose.velocity.y;
       
       const boundedX = Math.max(0, Math.min(window.innerWidth - 50, newX));
       const boundedY = Math.max(0, Math.min(window.innerHeight - 50, newY));
@@ -216,7 +220,7 @@ class IdleState extends GooseState {
 class WanderState extends GooseState {
   constructor(goose) {
     super(goose);
-    this.goose.speed = 0.3;
+    this.goose.speed = 0.6;
   }
 
   enter() {
@@ -236,7 +240,7 @@ class WanderState extends GooseState {
 class ChaseState extends GooseState {
   constructor(goose) {
     super(goose);
-    this.goose.speed = 0.8;
+    this.goose.speed = 1.0;
   }
 
   enter() {

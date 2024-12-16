@@ -48,12 +48,14 @@ class AssetManager {
 
             const ext = path.substring(path.length - 3);
 
+            // Use chrome.runtime.getURL to get the full path to the asset
+            const fullPath = chrome.runtime.getURL(path);
+
             switch (ext) {
                 case 'jpg':
                 case 'png':
                     const img = new Image();
                     img.addEventListener("load", () => {
-                        // console.log("Loaded " + path);
                         this.successCount++;
                         if (this.isDone()) callback();
                     });
@@ -64,7 +66,7 @@ class AssetManager {
                         if (this.isDone()) callback();
                     });
 
-                    img.src = path;
+                    img.src = fullPath;
                     this.cache[path] = img;
                     break;
 
@@ -72,7 +74,6 @@ class AssetManager {
                 case 'wav':
                     const audio = new Audio();
                     audio.addEventListener("loadeddata", () => {
-                        // console.log("Loaded " + path);
                         this.successCount++;
                         if (this.isDone()) callback();
                     });
@@ -88,7 +89,7 @@ class AssetManager {
                         audio.currentTime = 0;
                     });
 
-                    audio.src = path;
+                    audio.src = fullPath;
                     audio.load();
 
                     this.cache[path] = audio;
@@ -104,7 +105,7 @@ class AssetManager {
 
     /**
      * @param {string} path The filepath of the Asset you are trying to access.
-     * @returns The image associated with the path in the cache (given that it has been successfully downloaded).
+     * @returns The file associated with the path in the cache (given that it has been successfully downloaded).
      */
     getAsset(path) {
         return this.cache[path];
@@ -115,7 +116,7 @@ class AssetManager {
      * @param {string} path The filepath of the audio you are trying to play.
      * @param {number} volume The volume to which you want to set the audio.
      */
-    playSFX(path, volume) {
+    playSFX(path, volume = 1.00) {
         const audio = this.cache[path];
         audio.currentTime = 0;
         audio.volume = volume;

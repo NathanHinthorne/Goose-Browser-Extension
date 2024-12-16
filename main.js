@@ -53,39 +53,6 @@ function resizeCanvas() {
 }
 
 function queueAssets() {
-  // Assuming these are the paths to your asset folders
-  const imagePaths = chrome.runtime.getURL('images/');
-  const audioPaths = chrome.runtime.getURL('audio/');
-
-  // List image files
-  chrome.runtime.getPackageDirectoryEntry((rootEntry) => {
-    rootEntry.getDirectory('images', {}, (imageDir) => {
-      const imageReader = imageDir.createReader();
-      imageReader.readEntries((imageEntries) => {
-        console.log("Image Paths:");
-        imageEntries.forEach((entry) => {
-          if (entry.isFile) {
-            console.log(imagePaths + entry.name);
-          }
-        });
-
-        // List audio files
-        rootEntry.getDirectory('audio', {}, (audioDir) => {
-          const audioReader = audioDir.createReader();
-          audioReader.readEntries((audioEntries) => {
-            console.log("Audio Paths:");
-            audioEntries.forEach((entry) => {
-              if (entry.isFile) {
-                console.log(audioPaths + entry.name);
-              }
-            });
-          });
-        });
-      });
-    });
-  });
-
-
   ASSET_MGR.queueDownload(Goose.SFX.HONK);
   ASSET_MGR.queueDownload(Goose.SFX.HONK_ECHO);
   ASSET_MGR.queueDownload(Goose.SPRITESHEET);
@@ -98,7 +65,6 @@ function queueAssets() {
 function initializeGoose() {
   if (!window.goose) {
     window.goose = new Goose();
-    ENGINE.addEntity(window.goose);
   }
   return window.goose;
 }
@@ -109,10 +75,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log("message blocked: ", message);
     return;
   };
+  console.log("Message received:", message);
 
   initializeEnvironment();
   
-  console.log("Message received:", message);
   const goose = initializeGoose();
   
   switch (message.command) {
@@ -126,6 +92,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
 
     case "startGoose":
+      ENGINE.addEntity(window.goose);
       goose.setState('wander');
       sendResponse({ status: "startedGoose" });
       break;
