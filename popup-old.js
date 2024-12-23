@@ -1,4 +1,4 @@
-let selectedMinutes = 10; // Default value
+// let selectedMinutes = 10; // Default value
 
 // document.querySelectorAll('.preset-button').forEach(button => {
 //     button.addEventListener('click', () => {
@@ -42,48 +42,48 @@ let selectedMinutes = 10; // Default value
 //     });
 // });
 
-document.getElementById('startButton').addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {command: "startGoose"});
-    });
+// document.getElementById('startButton').addEventListener('click', () => {
+//     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+//         chrome.tabs.sendMessage(tabs[0].id, {command: "startGoose"});
+//     });
 
-    chrome.storage.local.set({ 
-        timerMinutes: selectedMinutes,
-        timerStart: Date.now(),
-        timerActive: true
-    });
-    document.getElementById('stopButton').disabled = false;
-    document.getElementById('startButton').disabled = true;
-    chrome.runtime.sendMessage({ action: "startTimer" });
-    window.close();
-});
+//     chrome.storage.local.set({ 
+//         timerMinutes: selectedMinutes,
+//         timerStart: Date.now(),
+//         timerActive: true
+//     });
+//     document.getElementById('stopButton').disabled = false;
+//     document.getElementById('startButton').disabled = true;
+//     chrome.runtime.sendMessage({ action: "startTimer" });
+//     window.close();
+// });
 
-document.getElementById('stopButton').addEventListener('click', () => {
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, {command: "stopGoose"});
-    });
+// document.getElementById('stopButton').addEventListener('click', () => {
+//     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+//         chrome.tabs.sendMessage(tabs[0].id, {command: "stopGoose"});
+//     });
 
-    chrome.runtime.sendMessage({ action: "stopTimer" });
-    chrome.storage.local.set({ timerActive: false });
-    window.close();
-});
+//     chrome.runtime.sendMessage({ action: "stopTimer" });
+//     chrome.storage.local.set({ timerActive: false });
+//     window.close();
+// });
 
 // When popup opens, check the timer state
 // this maintains state even when the popup is closed
-chrome.storage.local.get(['timerActive'], (result) => {
-    if (result.timerActive) {
-        document.getElementById('stopButton').disabled = false;
-        document.getElementById('startButton').disabled = true;
-        // for (const button of document.getElementsByClassName('preset-button')) {
-        //     button.disabled = true;
-        // }
-        // document.getElementById('breakTime').disabled = true;
-    } else {
-        document.getElementById('stopButton').disabled = true;
-        document.getElementById('startButton').disabled = false;
-        // for (const button of document.getElementsByClassName('preset-button')) {
-        //     button.disabled = false;
-        // }
-        // document.getElementById('breakTime').disabled = false;
-    }
-});
+// chrome.storage.local.get(['timerActive'], (result) => {
+//     if (result.timerActive) {
+//         document.getElementById('stopButton').disabled = false;
+//         document.getElementById('startButton').disabled = true;
+//         for (const button of document.getElementsByClassName('preset-button')) {
+//             button.disabled = true;
+//         }
+//         document.getElementById('breakTime').disabled = true;
+//     } else {
+//         document.getElementById('stopButton').disabled = true;
+//         document.getElementById('startButton').disabled = false;
+//         for (const button of document.getElementsByClassName('preset-button')) {
+//             button.disabled = false;
+//         }
+//         document.getElementById('breakTime').disabled = false;
+//     }
+// });

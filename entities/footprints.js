@@ -29,7 +29,7 @@ class Footprints {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/footprints.png";
+        return "/images/sprites/footprints2.png";
     }
 
     static get SCALE() {
