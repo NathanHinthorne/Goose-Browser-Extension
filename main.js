@@ -117,15 +117,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "startGoose":
       ENGINE.addEntity(new Goose());
       Goose.instance.setState(Goose.STATES.WANDER);
+      chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: true });
       sendResponse({ status: "startedGoose" });
       break;
 
     case "stopGoose":
-      Goose.instance.kill();
-
       // erase everything from the ctx
       CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
+      Goose.instance.kill();
+      chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: false });
       sendResponse({ status: "stoppedGoose" });
       break;
   }
