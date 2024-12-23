@@ -1,5 +1,7 @@
 // ====== SETUP =======
 
+const DEBUG_MODE = true;
+
 let CANVAS;
 let CTX;
 let ENGINE;
@@ -9,6 +11,20 @@ let isInitialized = false;
 
 function initializeEnvironment() {
   if (isInitialized) return;
+
+  // load via chrome API
+  const fullPath = chrome.runtime.getURL('fonts/Silkscreen-Regular.ttf');
+  const pixelFont = new FontFace('pixel-font', 'url(' + fullPath + ')');
+
+  pixelFont.load().then(function (font) {
+    document.fonts.add(font);
+    console.log('Font loaded successfully');
+  }).catch(function (error) {
+    console.error('Failed to load font at path:', fullPath, error);
+    // Fallback to a default font
+    document.body.style.fontFamily = 'Arial, sans-serif';
+  });
+
 
   /** The html element on which we are drawing. */
   CANVAS = document.createElement('canvas');
@@ -20,11 +36,11 @@ function initializeEnvironment() {
   CANVAS.style.zIndex = '9999';
   CANVAS.style.pointerEvents = 'none'; // Prevent blocking user interaction
 
+  document.body.appendChild(CANVAS);
+
   /** The tool we use to draw on CANVAS. */
   CTX = CANVAS.getContext("2d");
   CTX.imageSmoothingEnabled = false; // Disable image smoothing for pixel art
-
-  document.body.appendChild(CANVAS);
 
   // Set canvas dimensions to match the viewport
   resizeCanvas();
@@ -37,17 +53,22 @@ function initializeEnvironment() {
   ASSET_MGR = new AssetManager();
   queueAssets();
 
+  if (DEBUG_MODE) {
+    console.info("Debug mode enabled.");
+    createDebugPanel();
+  }
+
   isInitialized = true;
 };
 
 function resizeCanvas() {
-  // Set actual canvas resolution (backing store)
+  // Set actual canvas resolution
   CANVAS.width = window.innerWidth * window.devicePixelRatio;
   CANVAS.height = window.innerHeight * window.devicePixelRatio;
-  
+
   // Scale the context to counter the resolution scaling
   CTX.scale(window.devicePixelRatio, window.devicePixelRatio);
-  
+
   // Reset image smoothing after context changes
   CTX.imageSmoothingEnabled = false;
 }
@@ -56,55 +77,91 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Goose.SFX.HONK);
   ASSET_MGR.queueDownload(Goose.SFX.HONK_ECHO);
   ASSET_MGR.queueDownload(Goose.SPRITESHEET);
+  ASSET_MGR.queueDownload(Shadow.SPRITESHEET);
+  ASSET_MGR.queueDownload(TextBox.SPRITESHEET);
+  ASSET_MGR.queueDownload(Honk.SPRITESHEET);
+  ASSET_MGR.queueDownload(Target.SPRITESHEET);
+  ASSET_MGR.queueDownload(Puddle.SPRITESHEET);
+  ASSET_MGR.queueDownload(Puddle.SFX.SPLASH);
+  ASSET_MGR.queueDownload(Mud.SPRITESHEET);
+  ASSET_MGR.queueDownload(Mud.SFX.SPLAT);
+  ASSET_MGR.queueDownload(Footprints.SPRITESHEET);
+  ASSET_MGR.queueDownload(DiscoBall.SPRITESHEET);
+  ASSET_MGR.queueDownload(DiscoBall.SFX.DANCE);
+
 }
 
 
 // ====== GOOSE INITIALIZATION =======
 
-// Singleton initialization function
-function initializeGoose() {
-  if (!window.goose) {
-    window.goose = new Goose();
-  }
-  return window.goose;
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only process messages in the main frame
   if (window !== window.top) {
-    console.log("message blocked: ", message);
+    // console.log("message blocked: ", message);
     return;
   };
-  console.log("Message received:", message);
+  // console.log("Message received:", message);
 
   initializeEnvironment();
-  
-  const goose = initializeGoose();
-  
+
   switch (message.command) {
     case "extensionStartup":
       console.log("Initializing Goose assets...");
       ASSET_MGR.downloadAll(() => {
         console.log("Assets downloaded successfully.");
         sendResponse({ status: "assetsDownloaded" });
-        ENGINE.start(); 
+        ENGINE.start();
       });
       break;
 
     case "startGoose":
-      ENGINE.addEntity(window.goose);
-      goose.setState('wander');
+      ENGINE.addEntity(new Goose());
+      Goose.instance.setState(Goose.STATES.WANDER);
       sendResponse({ status: "startedGoose" });
       break;
-    
+
     case "stopGoose":
-      goose.delete();
+      Goose.instance.kill();
 
       // erase everything from the ctx
       CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-      
+
       sendResponse({ status: "stoppedGoose" });
       break;
   }
   return true;  // Indicates we wish to send a response asynchronously
-}); 
+});
+
+function createDebugPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'debug-panel';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'debug-panel-header';
+  const title = document.createElement('h2');
+  title.className = 'debug-panel-title';
+  title.textContent = '🪿 Goose State Swapper';
+  header.appendChild(title);
+  panel.appendChild(header);
+
+  // Content
+  const content = document.createElement('div');
+  content.className = 'debug-panel-content';
+
+  // State buttons
+  ['IDLE', 'WANDER', 'CHASE', 'FLY', 'SWIM', 'DANCE', 'TRACK_MUD', 'DRAG_MEMES'].forEach(stateName => {
+    const button = document.createElement('button');
+    button.className = 'debug-button';
+    button.textContent = stateName;
+    button.onclick = () => {
+      if (Goose.instance) {
+        Goose.instance.setState(Goose.instance.constructor.STATES[stateName]);
+      }
+    };
+    content.appendChild(button);
+  });
+
+  panel.appendChild(content);
+  document.body.appendChild(panel);
+}

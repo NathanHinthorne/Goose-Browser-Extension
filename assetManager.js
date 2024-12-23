@@ -94,7 +94,7 @@ class AssetManager {
 
                     this.cache[path] = audio;
                     break;
-
+                
                 default:
                     console.error("Error loading " + path + ": unknown file extension");
                     this.errorCount++;

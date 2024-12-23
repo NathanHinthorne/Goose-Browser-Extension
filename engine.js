@@ -20,7 +20,9 @@ class GameEngine {
         /** How long has the game been running? */
         this.gameTime = 0;
 
-        console.log("Engine constructor was called");
+        this.mouseX = 0;
+        this.mouseY = 0;
+        this.mouseClicked = false;
     };
 
     /**
@@ -36,6 +38,9 @@ class GameEngine {
         } else {
             this.entities.midground.push(entity);
         }
+
+        // as a precaution from previous removals, ensure removeFromCanvas is false
+        entity.removeFromCanvas = false;
     };
 
     /** This is going to clear all of the entities so that a new set can be placed in. */
@@ -49,7 +54,7 @@ class GameEngine {
 
     /** Controls the update-render loop */
     start() {
-        // this.configureEventListeners();
+        this.configureEventListeners();
         this.running = true;
         const gameLoop = () => {
             this.loop();
@@ -113,7 +118,58 @@ class GameEngine {
         this.entities.midground.forEach((entity) => { entity.draw(); });
         this.entities.foreground.forEach((entity) => { entity.draw(); });
     };
+
+    configureEventListeners() {
+        console.log("Configuring event listeners");
+
+        document.addEventListener("mousedown", (mouseEvent) => {
+            this.mouseClicked = true;
+        });
+
+        document.addEventListener("mouseup", (mouseEvent) => {
+            this.mouseClicked = false;
+        });
+
+        document.addEventListener("mousemove", (mouseEvent) => {
+            const rect = CANVAS.getBoundingClientRect();
+            const x = mouseEvent.clientX - rect.left;
+            const y = mouseEvent.clientY - rect.top;
+
+            this.mouseX = x;
+            this.mouseY = y;
+
+            // console.log(`Mouse move at canvas coordinates: (${x}, ${y})`);
+        });
+    }
+
+    static get FPS() {
+        return 60;
+    }
+
+    static get DEPTH() {
+        return {
+            BACKGROUND: -1,
+            MIDGROUND: 0,
+            FOREGROUND: 1
+        }
+    }
 };
+
+//! not being used yet
+function checkWindowState() {
+    // minimized vs maximized
+    // document.visibilityState === 'visible'
+
+    // active vs inactive
+    // document.hasFocus()
+
+    if (document.hasFocus()) {
+        console.log('✅ Window is active');
+    } else {
+        console.log('⛔️ Window is inactive');
+    }
+}
+
 
 /** Creates an alias for requestAnimationFrame for backwards compatibility. */
 window.requestAnimFrame = (() => {
@@ -128,6 +184,6 @@ window.requestAnimFrame = (() => {
          * @param {DOM} element DOM ELEMENT
          */
         ((callback, element) => {
-            window.setTimeout(callback, 1000 / 60);
+            window.setTimeout(callback, 1000 / GameEngine.FPS);
         });
 })();

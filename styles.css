@@ -1,18 +1,59 @@
-.goose {
-    image-rendering: pixelated; /* Modern browsers */
-    image-rendering: -moz-crisp-edges; /* Firefox */
-    image-rendering: crisp-edges; /* Safari */
-    position: fixed;
-    z-index: 9999;
-    pointer-events: none;
-    transition: all 0.5s ease;
-    background-repeat: no-repeat;
-}
-
 .goose-meme {
     position: fixed;
     max-width: 300px;
     z-index: 9999;
     cursor: move;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+
+.debug-panel {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    width: 220px;
+    background: #27272a;
+    border: 2px solid #f97316;
+    border-radius: 8px;
+    font-family: monospace;
+    z-index: 10000;
+}
+
+.debug-panel-header {
+    background: #18181b;
+    padding: 12px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom: 1px solid rgba(249, 115, 22, 0.2);
+}
+
+.debug-panel-title {
+    color: #fb923c;
+    font-size: 16px;
+    margin: 0;
+}
+
+.debug-panel-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.debug-button {
+    width: 100%;
+    padding: 8px 16px;
+    background: #3f3f46;
+    color: #fafafa;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.debug-button:hover {
+    background: #f97316;
+    border-color: #fb923c;
 }

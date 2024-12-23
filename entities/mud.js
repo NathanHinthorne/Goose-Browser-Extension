@@ -1,22 +1,22 @@
-class Puddle {
-    constructor(puddleX, puddleY) {
+class Mud {
+    constructor(mudX, mudY) {
         // Position offsets initial coords
         this.xOffset = 0;
         this.yOffset = 28;
 
         this.position = {
-            x: puddleX + this.xOffset,
-            y: puddleY + this.yOffset
+            x: mudX + this.xOffset,
+            y: mudY + this.yOffset
         };
         
         this.hasGoose = false;
         
-        // Create puddle animations - 3 frames each
+        // Create Mud animations - 3 frames each
         this.emptyAnimation = new Animator(
             0,                          // row
-            Puddle.SPRITESHEET,         // spritesheet path
-            Puddle.FRAME_SIZE,          // frame dimensions
-            Puddle.SCALE,               // scale
+            Mud.SPRITESHEET,         // spritesheet path
+            Mud.FRAME_SIZE,          // frame dimensions
+            Mud.SCALE,               // scale
             1,                          // frame count
             0.4,                        // frame duration in seconds
             true                        // looped
@@ -24,9 +24,9 @@ class Puddle {
 
         this.withGooseAnimation = new Animator(
             1,                          // row (second row of spritesheet)
-            Puddle.SPRITESHEET,         // spritesheet path
-            Puddle.FRAME_SIZE,          // frame dimensions
-            Puddle.SCALE,               // scale
+            Mud.SPRITESHEET,         // spritesheet path
+            Mud.FRAME_SIZE,          // frame dimensions
+            Mud.SCALE,               // scale
             3,                          // frame count
             0.4,                        // frame duration in seconds
             true                        // looped
@@ -45,7 +45,7 @@ class Puddle {
     addGoose() {
         this.hasGoose = true;
         this.currentAnimation = this.withGooseAnimation;
-        ASSET_MGR.playSFX(Puddle.SFX.SPLASH);
+        ASSET_MGR.playSFX(Mud.SFX.SPLAT);
     }
 
     removeGoose() {
@@ -57,24 +57,24 @@ class Puddle {
         this.removeFromCanvas = true;
     }
 
-    static get SPRITESHEET() {
-        return "/images/sprites/puddle.png";
-    }
+  static get SPRITESHEET() {
+    return "/images/sprites/mud.png";
+  }
 
-    static get SFX() {
-        return {
-            SPLASH: "/audio/splash.mp3"
-        };
-    }
+  static get SCALE() {
+    return 2;
+  }
 
-    static get SCALE() {
-        return 2;
-    }
+  static get FRAME_SIZE() {
+    return {
+      width: 32,
+      height: 16
+    };
+  }
 
-    static get FRAME_SIZE() {
-        return {
-            width: 32,
-            height: 16
-        };
-    }
+  static get SFX() {
+    return {
+      SPLAT: "/audio/splat.mp3"
+    };
+  }
 }

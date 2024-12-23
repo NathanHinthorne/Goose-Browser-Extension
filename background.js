@@ -63,11 +63,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
 // Handle alarms for scheduled tasks
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'periodicTask') {
-    // Execute scheduled task
-  }
-});
+// chrome.alarms.onAlarm.addListener((alarm) => {
+//   if (alarm.name === 'periodicTask') {
+//     // Execute scheduled task
+//   }
+// });
 
 async function getCurrentTab() {
   const [tab] = await chrome.tabs.query({

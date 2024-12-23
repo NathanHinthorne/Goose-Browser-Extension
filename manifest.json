@@ -3,7 +3,7 @@
   "name": "Annoying Goose",
   "version": "1.0",
   "description": "A playful goose that encourages taking breaks with some crazy antics.",
-  "permissions": ["tabs", "storage", "alarms"],
+  "permissions": ["storage", "tabs"],
   "host_permissions": [
     "<all_urls>"
   ],
@@ -34,7 +34,13 @@
         "animator.js",
         "entities/goose.js",
         "entities/honk.js",
-        "entities/puddle.js"
+        "entities/shadow.js",
+        "entities/textbox.js",
+        "entities/target.js",
+        "entities/puddle.js",
+        "entities/discoBall.js",
+        "entities/footprints.js",
+        "entities/mud.js"
       ],
     "all_frames": true,
     "run_at": "document_idle"
@@ -42,7 +48,8 @@
   "web_accessible_resources": [{
     "resources": [
       "images/*", 
-      "audio/*"
+      "audio/*",
+      "fonts/*"
     ],
     "matches": ["<all_urls>"]
   }]
