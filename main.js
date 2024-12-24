@@ -1,6 +1,6 @@
 // ====== SETUP =======
 
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 let CANVAS;
 let CTX;

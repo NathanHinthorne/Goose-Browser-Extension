@@ -13,3 +13,7 @@ Use at your own risk. You may get very annoyed.
 ## Goose State Diagram
 
 ![Goose State Diagram](images/github/state-diagram.png)
+
+## Acknowledgements
+
+Credit to Sonicfan32 for the base goose sprites!

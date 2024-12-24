@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Annoying Goose",
-  "version": "1.0",
-  "description": "A playful goose that encourages taking breaks with some crazy antics.",
+  "version": "1.1",
+  "description": "A playful goose that will enhance your browsing experience with some crazy antics.",
   "permissions": ["storage", "tabs"],
   "host_permissions": [
     "<all_urls>"
