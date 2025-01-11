@@ -1,9 +1,34 @@
 # Annoying Goose Browser Extension
 
-A playful goose that encourages taking breaks. This extension is designed to prevent users from getting too absorbed with their devices by providing a fun way to take breaks.
-
 BEWARE THE WRATH OF THE GOOSE! 🪿
 Use at your own risk. You may get very annoyed.
+
+## Google Web Store Description
+
+### 📋 HOW TO USE
+
+1. Open a new tab (not a blank tab)
+2. Find Annoying Goose in your extensions list, then click it and select "Start Goose".
+
+- To disable the goose, select "VAPORIZE GOOSE" from the extension.
+- To open a popup allowing you to manually change the goose's current activity, select "Enable State Swapper" from the extension.
+
+### 📅 VERSION HISTORY
+
+=== Version 1.2 ===
+
+- Added toggle button to enable/disable the Goose State Swapper pop-up.
+
+=== Version 1.1 ===
+
+- Added the goose's "track mud" state.
+- Added text boxes for the goose.
+- Fixed movement bugs.
+
+### 🎨 ARTWORK
+
+- Credit to Sonicfan32 for the goose sprite sheet.
+- Remaining sprites were created by me (Nathan)
 
 ## Plans
 
@@ -13,8 +38,7 @@ Use at your own risk. You may get very annoyed.
 ## Goose State Diagram
 
 ![Goose State Diagram](images/github/state-diagram.png)
-![Goose Sprite](images/sprites/goose.png)
 
 ## Acknowledgements
 
-Credit to Sonicfan32 for the base goose sprites!
+Credit to Sonicfan32 for the goose spritesheet!
