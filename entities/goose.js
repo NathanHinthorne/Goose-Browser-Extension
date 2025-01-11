@@ -68,12 +68,12 @@ class IdleState extends GooseState {
   enter() {
     this.goose.speed = 0;
     this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
-    this.animationSwitchChance = 0.15 / GameEngine.FPS; // 15% chance a second
-    this.wanderChance = 0.07 / GameEngine.FPS; // 7% chance a second
+    // this.animationSwitchChance = 0.15 / GameEngine.FPS; // 15% chance a second
+    this.wanderChance = 0.06 / GameEngine.FPS; // 6% chance a second
     this.flyChance = 0.02 / GameEngine.FPS; // 2% chance a second
     this.swimChance = 0.02 / GameEngine.FPS; // 2% chance a second
-    this.danceChance = 0.01 / GameEngine.FPS; // 1% chance a second
-    this.trackMudChance = 0.01 / GameEngine.FPS; // 1% chance a second
+    this.danceChance = 0.02 / GameEngine.FPS; // 2% chance a second
+    this.trackMudChance = 0.02 / GameEngine.FPS; // 2% chance a second
 
     // swap back to default animation when one-time animations finish
     Goose.ANIMATIONS.LOOKING_AROUND.setOnComplete(() => {
@@ -123,7 +123,7 @@ class WanderState extends GooseState {
     this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
     this.targetRandomLocation();
 
-    ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_TEXT), GameEngine.DEPTH.FOREGROUND);
+    ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_WANDER_TEXT), GameEngine.DEPTH.FOREGROUND);
   }
 
   update() {
@@ -149,9 +149,13 @@ class ChaseState extends GooseState {
     this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
     this.arrivedAtMouse = false;
     this.elapsedTime = 0;
-    this.timeLimit = 15; 
+    this.timeLimit = 25; 
     this.timeSinceLastHonk = 0;
-    this.honkInterval = 0.5 + Math.random() * 2; 
+    this.timeSinceLastTalk = 0;
+    this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
+    this.talkInterval = 8; // Talk every 8 seconds
+
+    ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_INITIAL_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
   }
 
   update() {
@@ -177,10 +181,16 @@ class ChaseState extends GooseState {
 
       this.timeSinceLastHonk += ENGINE.clockTick;
       if (this.timeSinceLastHonk >= this.honkInterval) {
-        ASSET_MGR.playSFX(Goose.SFX.HONK);
+        ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
         ENGINE.addEntity(new Honk(this.goose), GameEngine.DEPTH.FOREGROUND);
         this.timeSinceLastHonk = 0;
-        this.honkInterval = 0.5 + Math.random() * 2; 
+        this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
+      }
+
+      this.timeSinceLastTalk += ENGINE.clockTick;
+      if (this.timeSinceLastTalk >= this.talkInterval) {
+        ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_UPDATE_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
+        this.timeSinceLastTalk = 0;
       }
     }
   }
@@ -287,8 +297,6 @@ class SwimState extends GooseState {
     // Create and add puddle to game
     this.puddle = new Puddle(puddleX, puddleY);
     ENGINE.addEntity(this.puddle, GameEngine.DEPTH.BACKGROUND);
-
-    this.goose.shadow.hide();
     
     // Set target to puddle location
     this.setTarget(puddleX, puddleY);
@@ -298,7 +306,7 @@ class SwimState extends GooseState {
     
     // Set a time limit for swimming
     this.elapsedTime = 0;
-    this.swimDuration = 5 + Math.random() * 5; // Random duration between 5-10 seconds
+    this.swimDuration = 15 + Math.random() * 10; // Random duration between 15-25 seconds
   }
 
   update() {
@@ -306,6 +314,7 @@ class SwimState extends GooseState {
       if (this.distanceToTarget < 2) {
         // We've reached the puddle, start swimming
         this.hasReachedPuddle = true;
+        this.goose.shadow.hide();
         this.goose.currentAnimation = Goose.ANIMATIONS.SWIMMING;
         this.setVelocity(0, 0);
         this.puddle.addGoose(); // Trigger puddle animation change and splash sound
@@ -373,7 +382,7 @@ class TrackMudState extends GooseState {
     // Set a time limit for tracking mud
     this.elapsedTime = 0;
     this.stayInMudDuration = 2; // Stay in mud for 3 seconds
-    this.trackMudDuration = 40 + Math.random() * 10; // Random duration between 40-50 seconds
+    this.trackMudDuration = 50 + Math.random() * 10; // Random duration between 50-60 seconds
 
     this.trackingMud = false;
 
@@ -610,7 +619,7 @@ class Goose {
       this.currentState.exit();
     }
 
-    ASSET_MGR.playSFX(Goose.SFX.HONK);
+    ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
     ENGINE.addEntity(new Honk(this), GameEngine.DEPTH.FOREGROUND);
 
     // create new goose state based on the stateClass
@@ -708,9 +717,16 @@ class Goose {
 
   static get SFX() {
     return {
-      HONK: "/audio/honk.mp3",
+      HONK1: "/audio/honk1.mp3",
+      HONK2: "/audio/honk2.mp3",
+      HONK3: "/audio/honk3.mp3",
       HONK_ECHO: "/audio/honk-echo.mp3"
     };
+  }
+
+  static RANDOM_HONK_SFX() {
+    const sfxPaths = [Goose.SFX.HONK1, Goose.SFX.HONK2, Goose.SFX.HONK3];
+    return sfxPaths[Math.floor(Math.random() * sfxPaths.length)];
   }
 
   static get MEME_IMAGES() {

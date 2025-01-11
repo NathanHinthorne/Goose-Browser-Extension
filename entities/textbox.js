@@ -158,7 +158,7 @@ class TextBox {
         };
     }
 
-    static get RANDOM_TEXT() {
+    static get RANDOM_WANDER_TEXT() {
         const texts = [
             "*Inhales* ... Honk!!",
             "I cause problems.",
@@ -177,6 +177,35 @@ class TextBox {
             "I'm the boss around here.",
             "Hit me, I dare you!",
             "Your computer is my playground.",
+        ];
+
+        return texts[Math.floor(Math.random() * texts.length)];
+    }
+
+    static get RANDOM_INITIAL_CHASE_TEXT() {
+        const texts = [
+            "Alright, now you're gonna get it!",
+            "You're in trouble now!",
+            "HEY! Watch it pal!",
+            "You're gonna regret doing that...",
+            "YOU DARE HIT ME?!",
+            "Mess with the honk, you get the bonk!",
+        ];
+
+        return texts[Math.floor(Math.random() * texts.length)];
+    }
+
+    static get RANDOM_UPDATE_CHASE_TEXT() {
+        const texts = [
+            "You're not getting away this time!",
+            "I'm coming for you!",
+            "I'm on your tail!",
+            "You can't run forever!",
+            "I'm gaining on you!",
+            "You can't hide from me!",
+            "You can't shake me!",
+            "I'm not done with you yet!",
+            "I'm not giving up!",
         ];
 
         return texts[Math.floor(Math.random() * texts.length)];

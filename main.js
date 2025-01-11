@@ -8,6 +8,7 @@ let ENGINE;
 let ASSET_MGR;
 
 let isInitialized = false;
+let stateSwapperPanel;
 
 function initializeEnvironment() {
   if (isInitialized) return;
@@ -52,10 +53,11 @@ function initializeEnvironment() {
   /** The AssetManager which contains all images and sound. */
   ASSET_MGR = new AssetManager();
   queueAssets();
+  
+  createStateSwapperPanel();
 
   if (DEBUG_MODE) {
     console.info("Debug mode enabled.");
-    createDebugPanel();
   }
 
   isInitialized = true;
@@ -74,7 +76,9 @@ function resizeCanvas() {
 }
 
 function queueAssets() {
-  ASSET_MGR.queueDownload(Goose.SFX.HONK);
+  ASSET_MGR.queueDownload(Goose.SFX.HONK1);
+  ASSET_MGR.queueDownload(Goose.SFX.HONK2);
+  ASSET_MGR.queueDownload(Goose.SFX.HONK3);
   ASSET_MGR.queueDownload(Goose.SFX.HONK_ECHO);
   ASSET_MGR.queueDownload(Goose.SPRITESHEET);
   ASSET_MGR.queueDownload(Shadow.SPRITESHEET);
@@ -88,7 +92,6 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Footprints.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SFX.DANCE);
-
 }
 
 
@@ -128,40 +131,69 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: false });
       sendResponse({ status: "stoppedGoose" });
       break;
+    
+    case "toggleStateSwapper":
+      if (message.enabled) {
+        showStateSwapperPanel();
+      } else {
+        hideStateSwapperPanel();
+      }
+      sendResponse({ status: "stateSwapperToggled" });
+      break;
   }
   return true;  // Indicates we wish to send a response asynchronously
 });
 
-function createDebugPanel() {
-  const panel = document.createElement('div');
-  panel.className = 'debug-panel';
+function createStateSwapperPanel() {
+  stateSwapperPanel = document.createElement('div');
+  stateSwapperPanel.className = 'state-panel';
 
   // Header
   const header = document.createElement('div');
-  header.className = 'debug-panel-header';
+  header.className = 'state-panel-header';
   const title = document.createElement('h2');
-  title.className = 'debug-panel-title';
+  title.className = 'state-panel-title';
   title.textContent = '🪿 Goose State Swapper';
   header.appendChild(title);
-  panel.appendChild(header);
+  stateSwapperPanel.appendChild(header);
 
   // Content
   const content = document.createElement('div');
-  content.className = 'debug-panel-content';
+  content.className = 'state-panel-content';
 
   // State buttons
   ['IDLE', 'WANDER', 'CHASE', 'FLY', 'SWIM', 'DANCE', 'TRACK_MUD', 'DRAG_MEMES'].forEach(stateName => {
     const button = document.createElement('button');
-    button.className = 'debug-button';
+    button.className = 'state-button';
     button.textContent = stateName;
     button.onclick = () => {
       if (Goose.instance) {
         Goose.instance.setState(Goose.instance.constructor.STATES[stateName]);
+      } else {
+        console.error('Goose instance not found');
       }
     };
     content.appendChild(button);
   });
 
-  panel.appendChild(content);
-  document.body.appendChild(panel);
+  stateSwapperPanel.appendChild(content);
+  document.body.appendChild(stateSwapperPanel);
+  
+  if (DEBUG_MODE) {
+    showStateSwapperPanel();
+  } else {
+    hideStateSwapperPanel();
+  }
+}
+
+function showStateSwapperPanel() {
+  if (stateSwapperPanel) {
+    stateSwapperPanel.style.display = 'block';
+  }
+}
+
+function hideStateSwapperPanel() {
+  if (stateSwapperPanel) {
+    stateSwapperPanel.style.display = 'none';
+  }
 }
