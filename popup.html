@@ -101,23 +101,50 @@
             cursor: not-allowed;
         }
 
-        /* Input styles */
-        .custom-time {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* Toggle switch styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 17px;
         }
 
-        .timer-input {
-            flex: 1;
-            padding: 8px;
-            border: 2px solid var(--button-border);
-            border-radius: 4px;
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
         }
 
-        .timer-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 17px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 13px;
+            width: 13px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(13px);
         }
 
         label {
@@ -130,19 +157,15 @@
     <img src="images/ui/perfect-goose.png" class="corner-goose" alt="goose">
     <img src="images/ui/footprints4.png" class="footprints" alt="footprints">
     <h2>Annoying Goose</h2>
-    <!-- <div class="button-container">
-        <button class="preset-button">30 minutes</button>
-        <button class="preset-button">1 hour</button>
-        <button class="preset-button">2 hours</button>
-    </div>
-    <div class="custom-time">
-        <label for="breakTime">Custom time (minutes):</label>
-        <input type="number" id="breakTime" class="timer-input" min="1" max="720" value="10">
-    </div> -->
-    <!-- <button id="startButton" class="start-button">Start Timer</button>
-    <button id="stopButton" class="stop-button">HALT THE GOOSE!</button> -->
     <button id="startButton" class="start-button">Start Goose</button>
     <button id="stopButton" class="stop-button">VAPORIZE GOOSE!</button>
+    <div style="margin-top: 15px;">
+        <label class="toggle-switch">
+            <input type="checkbox" id="toggleStateSwapper">
+            <span class="slider"></span>
+        </label>
+        <label for="toggleStateSwapper">Show State Swapper </label>
+    </div>
     <script src="popup.js"></script>
 </body>
 
