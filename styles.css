@@ -7,7 +7,7 @@
 }
 
 
-.debug-panel {
+.state-panel {
     position: fixed;
     left: 16px;
     bottom: 16px;
@@ -19,7 +19,7 @@
     z-index: 10000;
 }
 
-.debug-panel-header {
+.state-panel-header {
     background: #18181b;
     padding: 12px;
     border-top-left-radius: 6px;
@@ -27,20 +27,20 @@
     border-bottom: 1px solid rgba(249, 115, 22, 0.2);
 }
 
-.debug-panel-title {
+.state-panel-title {
     color: #fb923c;
     font-size: 16px;
     margin: 0;
 }
 
-.debug-panel-content {
+.state-panel-content {
     padding: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.debug-button {
+.state-button {
     width: 100%;
     padding: 8px 16px;
     background: #3f3f46;
@@ -53,7 +53,7 @@
     transition: all 0.2s;
 }
 
-.debug-button:hover {
+.state-button:hover {
     background: #f97316;
     border-color: #fb923c;
 }
