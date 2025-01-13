@@ -3,14 +3,17 @@
 BEWARE THE WRATH OF THE GOOSE! 🪿
 Use at your own risk. You may get very annoyed.
 
-## Google Web Store Description
+- Download on the [Chrome web store](https://chromewebstore.google.com/detail/annoying-goose/eejfnccgoejgidifcgpphjjfodmiofkm)
+- Download on the [Firefox add-ons store](https://addons.mozilla.org/en-US/firefox/addon/annoying-goose/)
+
+## Description
 
 ### 📋 HOW TO USE
 
-1. Open a new tab (not a blank tab)
+1. Open a new tab (cannot be a blank tab)
 2. Find Annoying Goose in your extensions list, then click it and select "Start Goose".
 
-- To disable the goose, select "VAPORIZE GOOSE" from the extension.
+- To disable the goose select "VAPORIZE GOOSE" from the extension.
 - To open a popup allowing you to manually change the goose's current activity, select "Enable State Swapper" from the extension.
 
 ### 📅 VERSION HISTORY
