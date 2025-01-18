@@ -105,6 +105,11 @@ class GameEngine {
                     entity.update();
                 }
             });
+
+            // reset input clicks
+            if (this.mouseClicked) {
+                this.mouseClicked = false;
+            }
         }
     };
 

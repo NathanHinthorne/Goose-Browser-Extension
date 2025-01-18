@@ -212,6 +212,88 @@ class ChaseState extends GooseState {
   }
 }
 
+/* stick to user's mouse instead of just following
+
+class ChaseState extends GooseState {
+  enter() {
+    this.goose.speed = 120;
+    this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+    this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
+    // this.arrivedAtMouse = false;
+    this.isStuckToMouse = false;
+    this.elapsedTime = 0;
+    this.timeLimit = 25;
+    this.timeSinceLastHonk = 0;
+    this.timeSinceLastTalk = 0;
+    this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
+    this.talkInterval = 8; // Talk every 8 seconds
+
+    ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_INITIAL_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
+  }
+
+  update() {
+    this.elapsedTime += ENGINE.clockTick;
+    if (this.elapsedTime > this.timeLimit) {
+      this.goose.setState(Goose.STATES.WANDER);
+    }
+
+    this.targetUserMouse();
+
+    if (this.distanceToTarget < 10 && !this.isStuckToMouse) { //&& !this.arrivedAtMouse
+      this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
+      //TODO instead of bobbing, trigger one-time "biting" animation
+      this.setVelocity(0, 0);
+      // this.arrivedAtMouse = true;
+      this.isStuckToMouse = true;
+    }
+    
+    if (this.distanceToTarget > 10) {
+      // if (this.arrivedAtMouse) {
+      //   this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+      //   this.arrivedAtMouse = false;
+      // }
+      if (this.isStuckToMouse) {
+        this.goose.position.x = ENGINE.mouseX;
+        this.goose.position.y = ENGINE.mouseY;
+
+      } else {
+        this.moveToTarget();
+
+        this.timeSinceLastHonk += ENGINE.clockTick;
+        if (this.timeSinceLastHonk >= this.honkInterval) {
+          ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
+          ENGINE.addEntity(new Honk(this.goose), GameEngine.DEPTH.FOREGROUND);
+          this.timeSinceLastHonk = 0;
+          this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
+        }
+
+        this.timeSinceLastTalk += ENGINE.clockTick;
+        if (this.timeSinceLastTalk >= this.talkInterval) {
+          ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_UPDATE_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
+          this.timeSinceLastTalk = 0;
+        }
+      }
+    }
+  }
+
+  targetUserMouse() {
+    // strategy #1: directly target mouse position
+    // this.setTarget(ENGINE.mouseX, ENGINE.mouseY);
+
+    // strategy #2:
+    // interpolate target position to smooth out movement, 
+    // making the goose look like its "reacting" to new mouse position
+    const smoothingFactor = 0.03;
+    this.interpolatedPos.x += (ENGINE.mouseX - this.interpolatedPos.x) * smoothingFactor;
+    this.interpolatedPos.y += (ENGINE.mouseY - this.interpolatedPos.y) * smoothingFactor;
+    this.setTarget(this.interpolatedPos.x, this.interpolatedPos.y);
+  }
+
+  exit() {
+  }
+}
+*/
+
 class FlyState extends GooseState {
   enter() {
     this.goose.speed = 80;

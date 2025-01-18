@@ -18,6 +18,10 @@ Use at your own risk. You may get very annoyed.
 
 ### 📅 VERSION HISTORY
 
+=== Version 1.3 ===
+
+- Fixed a bug where the mouse could be held down to hit the goose multiple times.
+
 === Version 1.2 ===
 
 - Added toggle button to enable/disable the Goose State Swapper pop-up.
