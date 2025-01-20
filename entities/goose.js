@@ -78,11 +78,11 @@ class IdleState extends GooseState {
     // swap back to default animation when one-time animations finish
     Goose.ANIMATIONS.LOOKING_AROUND.setOnComplete(() => {
       this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING
-      console.log("Returning to bobbing animation");
+      // console.log("Returning to bobbing animation");
     });
     Goose.ANIMATIONS.LOOKING_UP.setOnComplete(() => {
       this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING
-      console.log("Returning to bobbing animation");
+      // console.log("Returning to bobbing animation");
     });
   }
 
@@ -608,7 +608,7 @@ class DragMemesState extends GooseState {
   createMemeElement() {
     const meme = document.createElement('img');
     const imagePath = Goose.MEME_IMAGES[Math.floor(Math.random() * Goose.MEME_IMAGES.length)];
-    console.log("Getting meme image:", chrome.runtime.getURL(imagePath));
+    // console.log("Getting meme image:", chrome.runtime.getURL(imagePath));
     meme.src = chrome.runtime.getURL(imagePath);
     meme.className = 'goose-meme';
     meme.style.position = 'absolute';

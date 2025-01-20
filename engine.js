@@ -125,8 +125,6 @@ class GameEngine {
     };
 
     configureEventListeners() {
-        console.log("Configuring event listeners");
-
         document.addEventListener("mousedown", (mouseEvent) => {
             this.mouseClicked = true;
         });
@@ -168,10 +166,12 @@ function checkWindowState() {
     // active vs inactive
     // document.hasFocus()
 
-    if (document.hasFocus()) {
-        console.log('✅ Window is active');
-    } else {
-        console.log('⛔️ Window is inactive');
+    if (DEBUG_MODE) {
+        if (document.hasFocus()) {
+            console.log('✅ Window is active');
+        } else {
+            console.log('⛔️ Window is inactive');
+        }
     }
 }
 

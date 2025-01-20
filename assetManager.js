@@ -19,7 +19,6 @@ class AssetManager {
      * This method simply adds a filepath to the downloadQueue.
      */
     queueDownload(path) {
-        // console.log("Queueing " + path);
         this.downloadQueue.push(path);
     };
 

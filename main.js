@@ -19,7 +19,9 @@ function initializeEnvironment() {
 
   pixelFont.load().then(function (font) {
     document.fonts.add(font);
-    console.log('Font loaded successfully');
+    if (DEBUG_MODE) {
+      console.log('Font loaded successfully');
+    }
   }).catch(function (error) {
     console.error('Failed to load font at path:', fullPath, error);
     // Fallback to a default font
@@ -100,18 +102,23 @@ function queueAssets() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only process messages in the main frame
   if (window !== window.top) {
-    // console.log("message blocked: ", message);
+    if (DEBUG_MODE) {
+      // console.log("message blocked: ", message);
+    }
     return;
   };
-  // console.log("Message received:", message);
+  if (DEBUG_MODE) {
+    // console.log("Message received:", message);
+  }
 
   initializeEnvironment();
 
   switch (message.command) {
     case "extensionStartup":
-      console.log("Initializing Goose assets...");
       ASSET_MGR.downloadAll(() => {
-        console.log("Assets downloaded successfully.");
+        if (DEBUG_MODE) {
+          console.log("Assets downloaded successfully.");
+        }
         sendResponse({ status: "assetsDownloaded" });
         ENGINE.start();
       });
