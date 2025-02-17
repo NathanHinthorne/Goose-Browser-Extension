@@ -63,6 +63,9 @@ function initializeEnvironment() {
   }
 
   isInitialized = true;
+
+  // Keep track of when user minimizes the window
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 };
 
 function resizeCanvas() {
@@ -103,12 +106,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only process messages in the main frame
   if (window !== window.top) {
     if (DEBUG_MODE) {
-      // console.log("message blocked: ", message);
+      console.log("message blocked: ", message);
     }
     return;
   };
   if (DEBUG_MODE) {
-    // console.log("Message received:", message);
+    console.log("Message received:", message);
   }
 
   initializeEnvironment();
@@ -202,5 +205,15 @@ function showStateSwapperPanel() {
 function hideStateSwapperPanel() {
   if (stateSwapperPanel) {
     stateSwapperPanel.style.display = 'none';
+  }
+}
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    // Pause all audio when the document is hidden
+    ASSET_MGR.pauseAudio();
+  } else {
+    // Resume all audio when the document becomes visible
+    ASSET_MGR.resumeAudio();
   }
 }
