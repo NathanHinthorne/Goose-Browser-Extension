@@ -22,6 +22,8 @@ class GameEngine {
 
         this.mouseX = 0;
         this.mouseY = 0;
+        this.mouseVelocityX = 0;
+        this.mouseVelocityY = 0;
         this.mouseClicked = false;
     };
 
@@ -138,10 +140,13 @@ class GameEngine {
             const x = mouseEvent.clientX - rect.left;
             const y = mouseEvent.clientY - rect.top;
 
+            // calculate velocity from prev mouse position (last frame)
+            this.mouseVelocityX = x - this.mouseX;
+            this.mouseVelocityY = y - this.mouseY;
+
+            // update mouse position
             this.mouseX = x;
             this.mouseY = y;
-
-            // console.log(`Mouse move at canvas coordinates: (${x}, ${y})`);
         });
     }
 
