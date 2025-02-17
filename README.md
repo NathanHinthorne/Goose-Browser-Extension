@@ -18,6 +18,13 @@ Use at your own risk. You may get very annoyed.
 
 ### 📅 VERSION HISTORY
 
+=== Version 1.4 ===
+
+- Made the goose block HTML elements it is currently on top of. This prevents the user from accidently clicking something else while trying to interact with the goose.
+- Fixed a bug where the goose would occasionally glitch out after stepping out of mud.
+- Made all music and sound effects pause when the user leaves the active tab.
+- Added a "buy me a coffee" button to the main extension popup :)
+
 === Version 1.3 ===
 
 - Fixed a bug where the mouse could be held down to hit the goose multiple times.
