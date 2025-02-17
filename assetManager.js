@@ -13,6 +13,8 @@ class AssetManager {
         this.downloadQueue = [];
         /** An indexed array of filepaths which still need to be downloaded. */
         this.cache = [];
+        /** An array to keep track of currently playing audio. */
+        this.playingAudio = [];
     };
 
     /**
@@ -115,26 +117,64 @@ class AssetManager {
      * @param {string} path The filepath of the audio you are trying to play.
      * @param {number} volume The volume to which you want to set the audio.
      */
-    playSFX(path, volume = 1.00) {
+    playAudio(path, volume = 1.00) {
         const audio = this.cache[path];
+        if (!audio) {
+            console.error(`Audio asset not found in cache: ${path}`);
+            return;
+        }
         audio.currentTime = 0;
         audio.volume = volume;
 
         audio.play();
+        this.playingAudio.push(audio);
+
+        audio.addEventListener('ended', () => {
+            audio.pause();
+            audio.currentTime = 0;
+            this.removeFromPlayingAudio(audio);
+        });
     };
 
     /**
      * Stops all audio currently playing.
      */
     stopAudio() {
-        for (let key in this.cache) {
-            const audio = this.cache[key];
-            if (audio instanceof Audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }
+        for (let audio of this.playingAudio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+        this.playingAudio = [];
+    };
+
+    /**
+     * Pause all audio currently playing.
+     */
+    pauseAudio() {
+        for (let audio of this.playingAudio) {
+            audio.pause();
         }
     };
+
+    /**
+     * Resume all audio currently paused.
+     */
+    resumeAudio() {
+        for (let audio of this.playingAudio) {
+            audio.play();
+        }
+    }
+
+    /**
+     * Removes the given audio element from the playingAudio array.
+     * @param {HTMLAudioElement} audio The audio element to remove.
+     */
+    removeFromPlayingAudio(audio) {
+        const index = this.playingAudio.indexOf(audio);
+        if (index > -1) {
+            this.playingAudio.splice(index, 1);
+        }
+    }
 
     /** 
      * Sets the volume of all audio in the cache to the given volume.
