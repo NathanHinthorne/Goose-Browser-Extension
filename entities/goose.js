@@ -18,7 +18,7 @@ class GooseState {
 
   enter() {}
   exit() {}
-  update() { }
+  update() {}
   
 
   
@@ -141,7 +141,11 @@ class WanderState extends GooseState {
   }
 }
 
-// Chases user's mouse
+/**
+ * Chases user's mouse cursor. If goose arrives at mouse cursor, it will bite it, 
+ * sticking to the cursor's position until the user moves the mouse past the speed threshold. 
+ * When this happens, the goose is thrown off in the last direction the cursor was moving.
+ */
 class ChaseState extends GooseState {
   enter() {
     this.goose.speed = 120;
@@ -181,7 +185,7 @@ class ChaseState extends GooseState {
 
       this.timeSinceLastHonk += ENGINE.clockTick;
       if (this.timeSinceLastHonk >= this.honkInterval) {
-        ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
+        ASSET_MGR.playAudio(Goose.RANDOM_HONK_SFX());
         ENGINE.addEntity(new Honk(this.goose), GameEngine.DEPTH.FOREGROUND);
         this.timeSinceLastHonk = 0;
         this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
@@ -261,7 +265,7 @@ class ChaseState extends GooseState {
 
         this.timeSinceLastHonk += ENGINE.clockTick;
         if (this.timeSinceLastHonk >= this.honkInterval) {
-          ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
+          ASSET_MGR.playAudio(Goose.RANDOM_HONK_SFX());
           ENGINE.addEntity(new Honk(this.goose), GameEngine.DEPTH.FOREGROUND);
           this.timeSinceLastHonk = 0;
           this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
@@ -515,6 +519,15 @@ class TrackMudState extends GooseState {
       if (Math.random() < 0.01) {
         this.targetMoveDirection.x = Math.random() - 0.5;
         this.targetMoveDirection.y = Math.random() - 0.5;
+
+        // Ensure the speed is above the minimum threshold
+        const minSpeed = 0.4;
+        const speed = Math.sqrt(this.targetMoveDirection.x ** 2 + this.targetMoveDirection.y ** 2);
+        if (speed < minSpeed) {
+          const scale = minSpeed / speed;
+          this.targetMoveDirection.x *= scale;
+          this.targetMoveDirection.y *= scale;
+        }
       }
 
       // Ensure the target stays within bounds
@@ -612,8 +625,9 @@ class DragMemesState extends GooseState {
     meme.src = chrome.runtime.getURL(imagePath);
     meme.className = 'goose-meme';
     meme.style.position = 'absolute';
-    meme.style.zIndex = '9999';
+    meme.style.zIndex = '9998';
     meme.style.cursor = 'move';
+    
     return meme;
   }
 
@@ -687,6 +701,16 @@ class Goose {
     // Extra sprites that belong with the goose
     this.shadow = new Shadow(this);
     ENGINE.addEntity(this.shadow, GameEngine.DEPTH.BACKGROUND);
+
+    // Create an overlay for the goose
+    this.gooseOverlay = document.createElement('div');
+    this.gooseOverlay.style.position = 'absolute';
+    this.gooseOverlay.style.width = `${Goose.FRAME_SIZE * Goose.SCALE}px`;
+    this.gooseOverlay.style.height = `${Goose.FRAME_SIZE * Goose.SCALE}px`;
+    this.gooseOverlay.style.pointerEvents = 'auto';
+    this.gooseOverlay.style.userSelect = 'none'; // prevent text selection
+    this.gooseOverlay.style.backgroundColor = 'transparent'; // keep it invisible
+    document.body.appendChild(this.gooseOverlay);
   }
 
   /**
@@ -701,7 +725,7 @@ class Goose {
       this.currentState.exit();
     }
 
-    ASSET_MGR.playSFX(Goose.RANDOM_HONK_SFX());
+    ASSET_MGR.playAudio(Goose.RANDOM_HONK_SFX());
     ENGINE.addEntity(new Honk(this), GameEngine.DEPTH.FOREGROUND);
 
     // create new goose state based on the stateClass
@@ -718,7 +742,7 @@ class Goose {
   }
 
   kill() {
-    ASSET_MGR.playSFX(Goose.SFX.HONK_ECHO);
+    ASSET_MGR.playAudio(Goose.SFX.HONK_ECHO);
 
     // Stop any ongoing animations or intervals
     if (this.currentState && this.currentState.exit) {
@@ -759,6 +783,10 @@ class Goose {
     // movement updates
     this.position.x += this.velocity.x * ENGINE.clockTick;
     this.position.y += this.velocity.y * ENGINE.clockTick;
+
+    // update goose overlay position
+    this.gooseOverlay.style.left = `${this.position.x - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
+    this.gooseOverlay.style.top = `${this.position.y - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
   }
 
   draw() {
