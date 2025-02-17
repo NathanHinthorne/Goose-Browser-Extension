@@ -17,7 +17,7 @@ class DiscoBall {
     }
 
     start() {
-        ASSET_MGR.playSFX(DiscoBall.SFX.DANCE, 0.7);
+        ASSET_MGR.playAudio(DiscoBall.SFX.DANCE, 0.7);
     }
 
     update() {

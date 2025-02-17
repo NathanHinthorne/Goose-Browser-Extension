@@ -45,7 +45,7 @@ class Puddle {
     addGoose() {
         this.hasGoose = true;
         this.currentAnimation = this.withGooseAnimation;
-        ASSET_MGR.playSFX(Puddle.SFX.SPLASH);
+        ASSET_MGR.playAudio(Puddle.SFX.SPLASH);
     }
 
     removeGoose() {

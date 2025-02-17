@@ -45,7 +45,7 @@ class Mud {
     addGoose() {
         this.hasGoose = true;
         this.currentAnimation = this.withGooseAnimation;
-        ASSET_MGR.playSFX(Mud.SFX.SPLAT);
+        ASSET_MGR.playAudio(Mud.SFX.SPLAT);
     }
 
     removeGoose() {
