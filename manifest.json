@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Annoying Goose",
-  "version": "1.4",
+  "version": "1.5",
   "description": "A playful goose that will enhance your browsing experience with some crazy antics.",
   "permissions": ["storage", "tabs"],
   "host_permissions": [
@@ -35,12 +35,16 @@
         "entities/goose.js",
         "entities/honk.js",
         "entities/shadow.js",
+        "entities/egg.js",
+        "entities/gosling.js",
         "entities/textbox.js",
         "entities/target.js",
         "entities/puddle.js",
         "entities/discoBall.js",
         "entities/footprints.js",
-        "entities/mud.js"
+        "entities/mud.js",
+        "entities/bat.js",
+        "entities/angrySymbol.js"
       ],
     "all_frames": true,
     "run_at": "document_idle"
