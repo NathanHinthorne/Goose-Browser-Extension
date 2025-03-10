@@ -85,10 +85,18 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Goose.SFX.HONK2);
   ASSET_MGR.queueDownload(Goose.SFX.HONK3);
   ASSET_MGR.queueDownload(Goose.SFX.HONK_ECHO);
+  ASSET_MGR.queueDownload(Goose.SFX.SLAP);
   ASSET_MGR.queueDownload(Goose.SPRITESHEET);
   ASSET_MGR.queueDownload(Shadow.SPRITESHEET);
+  ASSET_MGR.queueDownload(Egg.SPRITESHEET);
+  ASSET_MGR.queueDownload(Egg.SFX.CRACK);
+  ASSET_MGR.queueDownload(Gosling.SPRITESHEET);
+  ASSET_MGR.queueDownload(Gosling.SFX.PEEP1);
+  ASSET_MGR.queueDownload(Gosling.SFX.PEEP2);
+  ASSET_MGR.queueDownload(Gosling.SFX.PEEP3);
   ASSET_MGR.queueDownload(TextBox.SPRITESHEET);
   ASSET_MGR.queueDownload(Honk.SPRITESHEET);
+  ASSET_MGR.queueDownload(AngrySymbol.SPRITESHEET);
   ASSET_MGR.queueDownload(Target.SPRITESHEET);
   ASSET_MGR.queueDownload(Puddle.SPRITESHEET);
   ASSET_MGR.queueDownload(Puddle.SFX.SPLASH);
@@ -97,6 +105,9 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Footprints.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SFX.DANCE);
+  ASSET_MGR.queueDownload(Bat.SPRITESHEET);
+  ASSET_MGR.queueDownload(Bat.SFX.BONK);
+
 }
 
 
@@ -172,7 +183,7 @@ function createStateSwapperPanel() {
   content.className = 'state-panel-content';
 
   // State buttons
-  ['IDLE', 'WANDER', 'CHASE', 'FLY', 'SWIM', 'DANCE', 'TRACK_MUD', 'DRAG_MEMES'].forEach(stateName => {
+  ['IDLE', 'WANDER', 'CHASE', 'FLY', 'SWIM', 'DANCE', 'TRACK_MUD', 'DRAG_MEMES', 'LAY_EGG'].forEach(stateName => {
     const button = document.createElement('button');
     button.className = 'state-button';
     button.textContent = stateName;
