@@ -67,7 +67,7 @@ class GooseState {
 class IdleState extends GooseState {
   enter() {
     this.goose.speed = 0;
-    this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
+    this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
     // this.animationSwitchChance = 0.15 / GameEngine.FPS; // 15% chance a second
     this.wanderChance = 0.06 / GameEngine.FPS; // 6% chance a second
     this.flyChance = 0.02 / GameEngine.FPS; // 2% chance a second
@@ -77,11 +77,11 @@ class IdleState extends GooseState {
 
     // swap back to default animation when one-time animations finish
     Goose.ANIMATIONS.LOOKING_AROUND.setOnComplete(() => {
-      this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING
+      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING)
       // console.log("Returning to bobbing animation");
     });
     Goose.ANIMATIONS.LOOKING_UP.setOnComplete(() => {
-      this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING
+      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING)
       // console.log("Returning to bobbing animation");
     });
   }
@@ -109,9 +109,9 @@ class IdleState extends GooseState {
 
     // if (Math.random() < this.animationSwitchChance && this.goose.currentAnimation === Goose.ANIMATIONS.BOBBING) {
     //   if (Math.random() < 0.5) {
-    //     this.goose.currentAnimation = Goose.ANIMATIONS.LOOKING_AROUND;
+    //     this.goose.setAnimation(Goose.ANIMATIONS.LOOKING_AROUND);
     //   } else {
-    //     this.goose.currentAnimation = Goose.ANIMATIONS.LOOKING_UP;
+    //     this.goose.setAnimation(Goose.ANIMATIONS.LOOKING_UP);
     //   }
     // }
   }
@@ -120,7 +120,7 @@ class IdleState extends GooseState {
 class WanderState extends GooseState {
   enter() {
     this.goose.speed = 30;
-    this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
+    this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
     this.targetRandomLocation();
 
     ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_WANDER_TEXT), GameEngine.DEPTH.FOREGROUND);
@@ -149,7 +149,7 @@ class WanderState extends GooseState {
 class ChaseState extends GooseState {
   enter() {
     this.goose.speed = 120;
-    this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+    this.goose.setAnimation(Goose.ANIMATIONS.ANGRY);
     this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
     this.arrivedAtMouse = false;
     this.elapsedTime = 0;
@@ -159,7 +159,14 @@ class ChaseState extends GooseState {
     this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
     this.talkInterval = 8; // Talk every 8 seconds
 
+    // this.hitDelay = 1; // Delay before goose can whack you after entering chase state
+
     ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_INITIAL_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
+
+    // this.bat = new Bat(this.goose);
+    // ENGINE.addEntity(this.bat, GameEngine.DEPTH.FOREGROUND);
+
+    // ENGINE.addEntity(new AngrySymbol(this.goose), GameEngine.DEPTH.FOREGROUND);
   }
 
   update() {
@@ -170,15 +177,21 @@ class ChaseState extends GooseState {
 
     this.targetUserMouse();
 
+    // goose just arrived at mouse cursor
     if (this.distanceToTarget < 10 && !this.arrivedAtMouse) {
-      this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
+      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
       this.setVelocity(0, 0);
       this.arrivedAtMouse = true;
+
+      // if (this.elapsedTime > this.hitDelay) {
+      //   this.bat.whack();
+      // }
     }
     
+    // goose is chasing the mouse cursor
     if (this.distanceToTarget > 20) {
       if (this.arrivedAtMouse) {
-        this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+        this.goose.setAnimation(Goose.ANIMATIONS.ANGRY);
         this.arrivedAtMouse = false;
       }
       this.moveToTarget();
@@ -213,6 +226,7 @@ class ChaseState extends GooseState {
   }
 
   exit() {
+    // this.bat.kill();
   }
 }
 
@@ -221,7 +235,7 @@ class ChaseState extends GooseState {
 class ChaseState extends GooseState {
   enter() {
     this.goose.speed = 120;
-    this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+    this.goose.setAnimation(Goose.ANIMATIONS.ANGRY;
     this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
     // this.arrivedAtMouse = false;
     this.isStuckToMouse = false;
@@ -244,7 +258,7 @@ class ChaseState extends GooseState {
     this.targetUserMouse();
 
     if (this.distanceToTarget < 10 && !this.isStuckToMouse) { //&& !this.arrivedAtMouse
-      this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
+      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING;
       //TODO instead of bobbing, trigger one-time "biting" animation
       this.setVelocity(0, 0);
       // this.arrivedAtMouse = true;
@@ -253,7 +267,7 @@ class ChaseState extends GooseState {
     
     if (this.distanceToTarget > 10) {
       // if (this.arrivedAtMouse) {
-      //   this.goose.currentAnimation = Goose.ANIMATIONS.ANGRY;
+      //   this.goose.setAnimation(Goose.ANIMATIONS.ANGRY;
       //   this.arrivedAtMouse = false;
       // }
       if (this.isStuckToMouse) {
@@ -301,7 +315,7 @@ class ChaseState extends GooseState {
 class FlyState extends GooseState {
   enter() {
     this.goose.speed = 80;
-    this.goose.currentAnimation = Goose.ANIMATIONS.FLYING;
+    this.goose.setAnimation(Goose.ANIMATIONS.FLYING);
     this.goose.shadow.freezeHeight();
     
     // Store initial position for the return journey
@@ -369,7 +383,7 @@ class FlyState extends GooseState {
 class SwimState extends GooseState {
   enter() {
     this.goose.speed = 30;  // Walking speed to puddle
-    this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
+    this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
     
     let puddleX, puddleY;
     do {
@@ -401,7 +415,7 @@ class SwimState extends GooseState {
         // We've reached the puddle, start swimming
         this.hasReachedPuddle = true;
         this.goose.shadow.hide();
-        this.goose.currentAnimation = Goose.ANIMATIONS.SWIMMING;
+        this.goose.setAnimation(Goose.ANIMATIONS.SWIMMING);
         this.setVelocity(0, 0);
         this.puddle.addGoose(); // Trigger puddle animation change and splash sound
       } else {
@@ -433,7 +447,7 @@ class ShooedState extends GooseState {
 
 class DanceState extends GooseState {
   enter() {
-    this.goose.currentAnimation = Goose.ANIMATIONS.DANCING;
+    this.goose.setAnimation(Goose.ANIMATIONS.DANCING);
     this.elapsedTime = 0;
     this.danceDuration = 8.8;
 
@@ -458,7 +472,7 @@ class DanceState extends GooseState {
 class TrackMudState extends GooseState {
   enter() {
     this.goose.speed = 30;  // Walking speed to mud
-    this.goose.currentAnimation = Goose.ANIMATIONS.BOBBING;
+    this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
     
     // Create and add mud to game
     this.mud = new Mud(this.goose.position.x, this.goose.position.y);
@@ -489,7 +503,7 @@ class TrackMudState extends GooseState {
     this.elapsedTime += ENGINE.clockTick;
       
     if (!this.trackingMud && this.elapsedTime > this.stayInMudDuration) {
-      this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
+      this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
       this.trackingMud = true;
       this.elapsedTime = 0;
       this.mud.removeGoose();
@@ -584,7 +598,7 @@ class TrackMudState extends GooseState {
 class DragMemesState extends GooseState {
   enter() {
     this.goose.speed = 50;
-    this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
+    this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
     this.targetRandomLocation();
 
     // Create meme element
@@ -666,8 +680,34 @@ class DragMemesState extends GooseState {
   }
 }
 
+/**
+ * Lays an egg that hatches into a gosling after a delay.
+ */
+class LayEggState extends GooseState {
+  enter() {
+    this.goose.setAnimation(Goose.ANIMATIONS.LAYING_EGG);
+    this.elapsedTime = 0;
+    this.layDuration = 1; // Lay egg for 6 seconds
 
+    // Create and add egg to game
+    this.goose.numChildren += 1;
+    this.egg = new Egg(this.goose.position.x, this.goose.position.y, this.goose.numChildren, this.goose);
+    ENGINE.addEntity(this.egg, GameEngine.DEPTH.BACKGROUND);
+  }
 
+  update() {
+    this.elapsedTime += ENGINE.clockTick;
+
+    if (this.elapsedTime >= this.layDuration) {
+      // Egg is laid, now hatch it into a gooselet
+      this.egg.hatch();
+      this.goose.setState(Goose.STATES.WANDER);
+    }
+  }
+
+  exit() {
+  }
+}
 
 
 
@@ -689,9 +729,11 @@ class Goose {
     this.velocity = { x: 0, y: 0 };
     
     this.facing = "right";
-    this.currentAnimation = Goose.ANIMATIONS.BOBBING;
+    this.setAnimation(Goose.ANIMATIONS.BOBBING);
     this.currentState = null;
     this.previousState = null;
+
+    this.numChildren = 0;
 
     if (DEBUG_MODE) {
       this.target = new Target(this);
@@ -741,6 +783,24 @@ class Goose {
     }
   }
 
+  setAnimation(animation) {
+    this.currentAnimation = animation;
+
+    const bendingDownAnimations = [
+      Goose.ANIMATIONS.LAYING_EGG,
+      Goose.ANIMATIONS.SWIMMING,
+      Goose.ANIMATIONS.RUNNING,
+      Goose.ANIMATIONS.ANGRY
+    ];
+
+    if (bendingDownAnimations.includes(animation)) {
+      this.isBendingDown = true;
+    } else {
+      this.isBendingDown = false;
+    }
+  }
+
+
   kill() {
     ASSET_MGR.playAudio(Goose.SFX.HONK_ECHO);
 
@@ -753,11 +813,8 @@ class Goose {
     // Clear from window  
     Goose.instance = null;
 
-    // kill entities tied to the goose
-    this.shadow.kill();
-    if (this.target) {
-      this.target.kill();
-    }
+    // clear all entities from the engine
+    ENGINE.clearEntities();
 
     this.removeFromCanvas = true;
   }
@@ -774,6 +831,7 @@ class Goose {
     // === STATE MANAGER ===
     // put global state transitions here (transitions that will happen regardless of current state)
     if (ENGINE.mouseClicked && this.collided(ENGINE.mouseX, ENGINE.mouseY)) {
+      ASSET_MGR.playAudio(Goose.SFX.SLAP);
       this.setState(Goose.STATES.CHASE);
     }
 
@@ -785,8 +843,10 @@ class Goose {
     this.position.y += this.velocity.y * ENGINE.clockTick;
 
     // update goose overlay position
-    this.gooseOverlay.style.left = `${this.position.x - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
-    this.gooseOverlay.style.top = `${this.position.y - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
+    const scrollX = window.scrollX || document.documentElement.scrollLeft;
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    this.gooseOverlay.style.left = `${this.position.x - (Goose.FRAME_SIZE * Goose.SCALE) / 2 + scrollX}px`;
+    this.gooseOverlay.style.top = `${this.position.y - (Goose.FRAME_SIZE * Goose.SCALE) / 2 + scrollY}px`;
   }
 
   draw() {
@@ -800,8 +860,10 @@ class Goose {
    * @returns {boolean} True if the goose has collided with the other entity, false otherwise.
    */
   collided(otherX, otherY) {
-    return (otherX > this.position.x - 32 && otherX < this.position.x + 32 &&
-      otherY > this.position.y - 32 && otherY < this.position.y + 32);
+    return (otherX > this.position.x - (Goose.FRAME_SIZE * Goose.SCALE / 2) &&
+      otherX < this.position.x + (Goose.FRAME_SIZE * Goose.SCALE / 2) &&
+      otherY > this.position.y - (Goose.FRAME_SIZE * Goose.SCALE / 2) &&
+      otherY < this.position.y + (Goose.FRAME_SIZE * Goose.SCALE / 2));
   }
 
 
@@ -830,7 +892,8 @@ class Goose {
       HONK1: "/audio/honk1.mp3",
       HONK2: "/audio/honk2.mp3",
       HONK3: "/audio/honk3.mp3",
-      HONK_ECHO: "/audio/honk-echo.mp3"
+      HONK_ECHO: "/audio/honk-echo.mp3",
+      SLAP: "/audio/slap.mp3"
     };
   }
 
@@ -862,6 +925,7 @@ class Goose {
     SHOOED: new Animator(7, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15),
     DANCING: new Animator(8, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2),
     ANGRY: new Animator(9, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15),
+    LAYING_EGG: new Animator(10, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.8),
   }
 
   static STATES = {
@@ -873,6 +937,7 @@ class Goose {
     SHOOED: ShooedState,
     DANCE: DanceState,
     TRACK_MUD: TrackMudState,
-    DRAG_MEMES: DragMemesState
+    DRAG_MEMES: DragMemesState,
+    LAY_EGG: LayEggState,
   }
 }

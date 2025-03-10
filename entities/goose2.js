@@ -1,7 +1,7 @@
 class DragMemesState extends GooseState {
   enter() {
     this.goose.speed = 50;
-    this.goose.currentAnimation = Goose.ANIMATIONS.WALKING;
+    this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
     this.targetRandomLocation();
 
     // Create meme element
