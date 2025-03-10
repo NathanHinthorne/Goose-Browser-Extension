@@ -109,25 +109,46 @@ document.getElementById('toggleStateSwapper').addEventListener('change', (event)
     });
 });
 
+                        
 // When popup opens, check the goose state and state swapper state
 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     const tabId = tabs[0].id;
-    chrome.storage.local.get([
-        `gooseActive_${tabId}`,
-        // `stateSwapperEnabled_${tabId}`,
-        'premiumEnabled'
-    ], (result) => {
-        if (result[`gooseActive_${tabId}`]) {
-            document.getElementById('stopButton').disabled = false;
-            document.getElementById('startButton').disabled = true;
-        } else {
-            document.getElementById('stopButton').disabled = true;
-            document.getElementById('startButton').disabled = false;
-        }
-        document.getElementById('toggleStateSwapper').checked = result[`stateSwapperEnabled_${tabId}`];
+    const url = tabs[0].url;
 
-        // if (result.premiumEnabled) {
-        //     enablePremiumFeatures();
-        // }
-    });
+    // List of blocked URLs
+    const blockedURLs = [
+        'about://', 
+        'chrome-error://',
+        'chrome://', 
+        'edge://',
+        'brave://',
+        'opera://',
+        'vivaldi://',
+        'https://chromewebstore.google.com/',
+    ];
+
+    // Disable popup if the URL matches any blocked site
+    const isBlocked = blockedURLs.some(blocked => url.startsWith(blocked));
+
+    if (isBlocked) {
+        alert('Sorry, the goose cannot be activated on this page :(');
+        document.getElementById('startButton').disabled = true;
+        document.getElementById('stopButton').disabled = true;
+        document.getElementById('toggleStateSwapper').disabled = true;
+    } else {
+        chrome.storage.local.get([
+            `gooseActive_${tabId}`,
+            `stateSwapperEnabled_${tabId}`,
+            'premiumEnabled'
+        ], (result) => {
+            if (result[`gooseActive_${tabId}`]) {
+                document.getElementById('stopButton').disabled = false;
+                document.getElementById('startButton').disabled = true;
+            } else {
+                document.getElementById('stopButton').disabled = true;
+                document.getElementById('startButton').disabled = false;
+            }
+            document.getElementById('toggleStateSwapper').checked = result[`stateSwapperEnabled_${tabId}`];
+        });
+    }
 });
