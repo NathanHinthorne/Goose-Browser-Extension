@@ -32,9 +32,7 @@ class Honk {
 
     update() {
         // Sync position to goose, adjusting xOffset based on facing direction
-        if (this.goose.currentAnimation === Goose.ANIMATIONS.RUNNING ||
-            this.goose.currentAnimation === Goose.ANIMATIONS.ANGRY
-        ) {
+        if (this.goose.isBendingDown) {
             if (this.goose.facing === "right") {
                 this.position.x = this.goose.position.x + this.xOffsetLowNeck;
             } else {
