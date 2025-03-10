@@ -1,12 +1,13 @@
 # Annoying Goose Browser Extension
 
 BEWARE THE WRATH OF THE GOOSE! 🪿
-Use at your own risk. You may get very annoyed.
 
 - Download on the [Chrome web store](https://chromewebstore.google.com/detail/annoying-goose/eejfnccgoejgidifcgpphjjfodmiofkm)
 - Download on the [Firefox add-ons store](https://addons.mozilla.org/en-US/firefox/addon/annoying-goose/)
 
 ## Description
+
+A pixel art goose that wanders around your screen and does random stuff. You could use it to prank your friends, or keep it around as a little browser buddy :D
 
 ### 📋 HOW TO USE
 
@@ -17,6 +18,11 @@ Use at your own risk. You may get very annoyed.
 - To open a popup allowing you to manually change the goose's current activity, select "Enable State Swapper" from the extension.
 
 ### 📅 VERSION HISTORY
+
+=== Version 1.5 ===
+
+- Punch sound effect when goose is clicked.
+- Added the goose's "lay egg" state (still contains bugs).
 
 === Version 1.4 ===
 
@@ -46,13 +52,15 @@ Use at your own risk. You may get very annoyed.
 
 ## Plans
 
-- Add a settings button within popup specifying the "evilness level" of the goose.
-  - The higher the evilness level, the more "crazy" the goose's pranks will be (i.e. ability to close tabs and other destructive actions).
+- New goose states:
+
+- Volume slider in popup
+
+- Minigame (will take a lot of time)
+  - Whenever the goose is active, make a random chance for tickets (looks like a dollar bill with a goose face on it) to appear randomly on the screen. When clicked, add a ticket to user's OVERALL storage (not just the current tab).
+  
+  - In the extension popup, make a grayed out button that says "Play Minigame" with a ticket icon. When clicked, use up a ticket and open a new tab with the minigame where the user controls a goose with arrows keys in (1) a platformer style game to collect coins or (2) a flappy bird style game to avoid obstacles (with a coin counter going up for each obstacle avoided). The coins are the real currency and will be used for clothing items for the goose.
 
 ## Goose State Diagram
 
 ![Goose State Diagram](images/github/state-diagram.png)
-
-## Acknowledgements
-
-Credit to Sonicfan32 for the goose spritesheet!
