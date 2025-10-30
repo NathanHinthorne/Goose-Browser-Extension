@@ -153,7 +153,7 @@ class ChaseState extends GooseState {
     this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
     this.arrivedAtMouse = false;
     this.elapsedTime = 0;
-    this.timeLimit = 25; 
+    this.timeLimit = 15; 
     this.timeSinceLastHonk = 0;
     this.timeSinceLastTalk = 0;
     this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
@@ -638,7 +638,7 @@ class DragMemesState extends GooseState {
     // console.log("Getting meme image:", chrome.runtime.getURL(imagePath));
     meme.src = chrome.runtime.getURL(imagePath);
     meme.className = 'goose-meme';
-    meme.style.position = 'absolute';
+    meme.style.position = 'fixed';
     meme.style.zIndex = '9998';
     meme.style.cursor = 'move';
     
@@ -746,7 +746,7 @@ class Goose {
 
     // Create an overlay for the goose
     this.gooseOverlay = document.createElement('div');
-    this.gooseOverlay.style.position = 'absolute';
+    this.gooseOverlay.style.position = 'fixed';
     this.gooseOverlay.style.width = `${Goose.FRAME_SIZE * Goose.SCALE}px`;
     this.gooseOverlay.style.height = `${Goose.FRAME_SIZE * Goose.SCALE}px`;
     this.gooseOverlay.style.pointerEvents = 'auto';
@@ -843,10 +843,8 @@ class Goose {
     this.position.y += this.velocity.y * ENGINE.clockTick;
 
     // update goose overlay position
-    const scrollX = window.scrollX || document.documentElement.scrollLeft;
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    this.gooseOverlay.style.left = `${this.position.x - (Goose.FRAME_SIZE * Goose.SCALE) / 2 + scrollX}px`;
-    this.gooseOverlay.style.top = `${this.position.y - (Goose.FRAME_SIZE * Goose.SCALE) / 2 + scrollY}px`;
+    this.gooseOverlay.style.left = `${this.position.x - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
+    this.gooseOverlay.style.top = `${this.position.y - (Goose.FRAME_SIZE * Goose.SCALE) / 2}px`;
   }
 
   draw() {
