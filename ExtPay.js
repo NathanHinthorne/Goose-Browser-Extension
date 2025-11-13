@@ -1,14 +1,14 @@
-let ExtPay = (function () {
+var ExtPay = (function () {
 	'use strict';
 
-	let commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+	var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 	function createCommonjsModule(fn) {
-	  let module = { exports: {} };
+	  var module = { exports: {} };
 		return fn(module, module.exports), module.exports;
 	}
 
-	let browserPolyfill = createCommonjsModule(function (module, exports) {
+	var browserPolyfill = createCommonjsModule(function (module, exports) {
 	(function (global, factory) {
 	  {
 	    factory(module);
@@ -1220,7 +1220,7 @@ let ExtPay = (function () {
 	    if (typeof chrome != "object" || !chrome || !chrome.runtime || !chrome.runtime.id) {
 	      throw new Error("This script should only be loaded in a browser extension.");
 	    } // The build process adds a UMD wrapper around this file, which makes the
-	    // `module` letiable available.
+	    // `module` variable available.
 
 
 	    module.exports = wrapAPIs(chrome);
@@ -1240,7 +1240,8 @@ let ExtPay = (function () {
 	    window.addEventListener('message', (event) => {
 	        if (event.origin !== 'https://extensionpay.com') return;
 	        if (event.source != window) return;
-	        if (event.data === 'fetch-user' || event.data === 'trial-start') {
+	        if (event.data === 'extpay-fetch-user' || event.data === 'extpay-trial-start') {
+	            window.postMessage(`${event.data}-received`);
 	            browserPolyfill.runtime.sendMessage(event.data);
 	        }
 	    }, false);
@@ -1274,7 +1275,7 @@ let ExtPay = (function () {
 	    // ----- start configuration checks
 	    browserPolyfill.management && browserPolyfill.management.getSelf().then(async (ext_info) => {
 	        if (!ext_info.permissions.includes('storage')) {
-	            let permissions = ext_info.hostPermissions.concat(ext_info.permissions);
+	            var permissions = ext_info.hostPermissions.concat(ext_info.permissions);
 	            throw `ExtPay Setup Error: please include the "storage" permission in manifest.json["permissions"] or else ExtensionPay won't work correctly.
 
 You can copy and paste this to your manifest.json file to fix this error:
@@ -1304,8 +1305,8 @@ You can copy and paste this to your manifest.json file to fix this error:
 	    const trial_callbacks =  [];
 
 	    async function create_key() {
-	        let body = {};
-	        let ext_info;
+	        var body = {};
+	        var ext_info;
 	        if (browserPolyfill.management) {
 	            ext_info = await browserPolyfill.management.getSelf();
 	        } else if (browserPolyfill.runtime) {
@@ -1350,7 +1351,7 @@ You can copy and paste this to your manifest.json file to fix this error:
 	    const datetime_re = /^\d\d\d\d-\d\d-\d\dT/;
 
 	    async function fetch_user() {
-	        let storage = await get(['extensionpay_user', 'extensionpay_installed_at']);
+	        var storage = await get(['extensionpay_user', 'extensionpay_installed_at']);
 	        const api_key = await get_key();
 	        if (!api_key) {
 	            return {
@@ -1361,7 +1362,7 @@ You can copy and paste this to your manifest.json file to fix this error:
 	            }
 	        }
 
-	        const resp = await fetch(`${EXTENSION_URL}/api/user?api_key=${api_key}`, {
+	        const resp = await fetch(`${EXTENSION_URL}/api/v2/user?api_key=${api_key}`, {
 	            method: 'GET',
 	            headers: {
 	                'Accept': 'application/json',
@@ -1373,7 +1374,7 @@ You can copy and paste this to your manifest.json file to fix this error:
 	        const user_data = await resp.json();
 
 	        const parsed_user = {};
-	        for (let [key, value] of Object.entries(user_data)) {
+	        for (var [key, value] of Object.entries(user_data)) {
 	            if (value && value.match && value.match(datetime_re)) {
 	                value = new Date(value);
 	            }
@@ -1398,12 +1399,18 @@ You can copy and paste this to your manifest.json file to fix this error:
 	        return parsed_user;
 	    }
 
-	    async function payment_page_link() {
-	        let api_key = await get_key();
-	        if (!api_key) {
-	            api_key = await create_key();
+	    async function get_plans() {
+	        const resp = await fetch(`${EXTENSION_URL}/api/v2/current-plans`, {
+	            method: 'GET',
+	            headers: {
+	                'Accept': 'application/json',
+	                'Content-type': 'application/json',
+	            },
+	        });
+	        if (!resp.ok) {
+	            throw `ExtPay: HTTP error while getting plans. Received http code: ${resp.status}`
 	        }
-	        return `${EXTENSION_URL}?api_key=${api_key}`
+	        return await resp.json();
 	    }
 
 	    async function open_popup(url, width, height) {
@@ -1440,40 +1447,51 @@ You can copy and paste this to your manifest.json file to fix this error:
 	        }
 	    }
 
-	    async function open_payment_page() {
-	        const url = await payment_page_link();
-	        open_popup(url, 500, 800);
+	    async function open_payment_page(plan_nickname) {
+	        var api_key = await get_key();
+	        if (!api_key) {
+	            api_key = await create_key();
+	        }
+	        let url = `${EXTENSION_URL}/choose-plan?api_key=${api_key}`;
+	        if (plan_nickname) {
+	            url = `${EXTENSION_URL}/choose-plan/${plan_nickname}?api_key=${api_key}`;
+	        }
+	        if (browserPolyfill.tabs && browserPolyfill.tabs.create) {
+	            await browserPolyfill.tabs.create({url, active: true});
+	        } else {
+	            window.open(url, '_blank');
+	        }
 	    }
 
 	    async function open_trial_page(period) {
 	        // let user have period string like '1 week' e.g. "start your 1 week free trial"
 
-	        let api_key = await get_key();
+	        var api_key = await get_key();
 	        if (!api_key) {
 	            api_key = await create_key();
 	        }
-	        let url = `${EXTENSION_URL}/trial?api_key=${api_key}`;
+	        var url = `${EXTENSION_URL}/trial?api_key=${api_key}`;
 	        if (period) {
 	            url += `&period=${period}`;
 	        }
 	        open_popup(url, 500, 700);
 	    }
 	    async function open_login_page() {
-	        let api_key = await get_key();
+	        var api_key = await get_key();
 	        if (!api_key) {
 	            api_key = await create_key();
 	        }
-	        const url = `${EXTENSION_URL}/reactivate?api_key=${api_key}`;
+	        const url = `${EXTENSION_URL}/reactivate?api_key=${api_key}&back=choose-plan&v2`;
 	        open_popup(url, 500, 800);
 	    }
 
-	    let polling = false;
+	    var polling = false;
 	    async function poll_user_paid() {
 	        // keep trying to fetch user in case stripe webhook is late
 	        if (polling) return;
 	        polling = true;
-	        let user = await fetch_user();
-	        for (let i=0; i < 2*60; ++i) {
+	        var user = await fetch_user();
+	        for (var i=0; i < 2*60; ++i) {
 	            if (user.paidAt) {
 	                polling = false;
 	                return user;
@@ -1493,11 +1511,11 @@ You can copy and paste this to your manifest.json file to fix this error:
 	        onPaid: {
 	            addListener: function(callback) {
 	                const content_script_template = `"content_scripts": [
-							{
-						"matches": ["${HOST}/*"],
-						"js": ["ExtPay.js"],
-						"run_at": "document_start"
-					}]`;
+                {
+            "matches": ["${HOST}/*"],
+            "js": ["ExtPay.js"],
+            "run_at": "document_start"
+        }]`;
 	                const manifest = browserPolyfill.runtime.getManifest();
 	                if (!manifest.content_scripts) {
 	                    throw `ExtPay setup error: To use the onPaid callback handler, please include ExtPay as a content script in your manifest.json. You can copy the example below into your manifest.json or check the docs: https://github.com/Glench/ExtPay#2-configure-your-manifestjson
@@ -1526,6 +1544,7 @@ You can copy and paste this to your manifest.json file to fix this error:
 	            //     // TODO
 	            // }
 	        },
+	        getPlans: get_plans,
 	        openPaymentPage: open_payment_page,
 	        openTrialPage: open_trial_page,
 	        openLoginPage: open_login_page,
@@ -1536,12 +1555,11 @@ You can copy and paste this to your manifest.json file to fix this error:
 	        },
 	        startBackground: function() {
 	            browserPolyfill.runtime.onMessage.addListener(function(message, sender, send_response) {
-	                console.log('service worker got message! Here it is:', message);
-	                if (message == 'fetch-user') {
+	                if (message == 'extpay-fetch-user') {
 	                    // Only called via extensionpay.com/extension/[extension-id]/paid -> content_script when user successfully pays.
 	                    // It's possible attackers could trigger this but that is basically harmless. It would just query the user.
 	                    poll_user_paid();
-	                } else if (message == 'trial-start') {
+	                } else if (message == 'extpay-trial-start') {
 	                    // no need to poll since the trial confirmation page has already set trialStartedAt
 	                    fetch_user(); 
 	                } else if (message == 'extpay-extinfo' && browserPolyfill.management) {
@@ -1555,4 +1573,4 @@ You can copy and paste this to your manifest.json file to fix this error:
 
 	return ExtPay;
 
-}());
+})();

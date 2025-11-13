@@ -1,12 +1,12 @@
-// importScripts('ExtPay.js');
+importScripts('ExtPay.js');
 
-// const extPay = ExtPay('annoying-goose'); 
-// extPay.startBackground();
+const extPay = ExtPay('annoying-goose'); 
+extPay.startBackground();
 
-// extPay.getUser().then(user => {
-// 	console.log(user)`
-// })
-
+// temp
+extPay.getUser().then(user => {
+  console.log(user);
+});
 
 
 // fires when the extension is first installed or updated
@@ -45,41 +45,6 @@ function triggerExtensionStartup() {
     });
   });
 }
-
-
-// Set badge when timer starts
-function setActiveBadge() {
-  chrome.action.setBadgeText({ text: "ON" });
-  chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-}
-
-// Clear badge when timer stops
-function clearBadge() {
-  chrome.action.setBadgeText({ text: "" });
-}
-
-// Listen for messages from popup
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("background.js recieved message:", message);
-
-  switch( message.action ) {
-    case "startTimer":
-      setActiveBadge();
-      break;
-
-    case "stopTimer":
-      clearBadge();
-      break;
-  }
-});
-
-
-// Handle alarms for scheduled tasks
-// chrome.alarms.onAlarm.addListener((alarm) => {
-//   if (alarm.name === 'periodicTask') {
-//     // Execute scheduled task
-//   }
-// });
 
 async function getCurrentTab() {
   const [tab] = await chrome.tabs.query({

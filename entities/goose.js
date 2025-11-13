@@ -66,27 +66,34 @@ class GooseState {
 
 class IdleState extends GooseState {
   enter() {
+    this.elapsedTime = 0;
+    this.timeLimit = 1;
     this.goose.speed = 0;
     this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
-    // this.animationSwitchChance = 0.15 / GameEngine.FPS; // 15% chance a second
-    this.wanderChance = 0.06 / GameEngine.FPS; // 6% chance a second
-    this.flyChance = 0.02 / GameEngine.FPS; // 2% chance a second
-    this.swimChance = 0.02 / GameEngine.FPS; // 2% chance a second
-    this.danceChance = 0.02 / GameEngine.FPS; // 2% chance a second
-    this.trackMudChance = 0.02 / GameEngine.FPS; // 2% chance a second
 
-    // swap back to default animation when one-time animations finish
-    Goose.ANIMATIONS.LOOKING_AROUND.setOnComplete(() => {
-      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING)
-      // console.log("Returning to bobbing animation");
-    });
-    Goose.ANIMATIONS.LOOKING_UP.setOnComplete(() => {
-      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING)
-      // console.log("Returning to bobbing animation");
-    });
+    // % chance of each state every second
+    this.wanderChance = 0.04 / GameEngine.FPS;
+    this.flyChance = 0.015 / GameEngine.FPS;
+    this.swimChance = 0.015 / GameEngine.FPS;
+    this.danceChance = 0.015 / GameEngine.FPS;
+    this.trackMudChance = 0.015 / GameEngine.FPS;
+    this.dragMemesChance = 0.015 / GameEngine.FPS;
+    this.layEggChance = 0; // Will be set based on premium status
   }
 
   update() {
+    this.elapsedTime += ENGINE.clockTick;
+
+    // Don't check for state transitions until premium check is complete
+    if (!this.goose.premiumCheckComplete || this.elapsedTime < this.timeLimit) {
+      return;
+    }
+
+    // Set lay egg chance based on premium status
+    if (this.layEggChance === 0 && this.goose.isPremium) {
+      this.layEggChance = 0.015 / GameEngine.FPS;
+    }
+
     if (Math.random() < this.wanderChance) {
       this.goose.setState(Goose.STATES.WANDER);
     }
@@ -107,13 +114,13 @@ class IdleState extends GooseState {
       this.goose.setState(Goose.STATES.TRACK_MUD);
     }
 
-    // if (Math.random() < this.animationSwitchChance && this.goose.currentAnimation === Goose.ANIMATIONS.BOBBING) {
-    //   if (Math.random() < 0.5) {
-    //     this.goose.setAnimation(Goose.ANIMATIONS.LOOKING_AROUND);
-    //   } else {
-    //     this.goose.setAnimation(Goose.ANIMATIONS.LOOKING_UP);
-    //   }
-    // }
+    if (Math.random() < this.dragMemesChance) {
+      this.goose.setState(Goose.STATES.DRAG_MEMES);
+    }
+
+    if (Math.random() < this.layEggChance) {
+      this.goose.setState(Goose.STATES.LAY_EGG);
+    }
   }
 }
 
@@ -141,32 +148,22 @@ class WanderState extends GooseState {
   }
 }
 
-/**
- * Chases user's mouse cursor. If goose arrives at mouse cursor, it will bite it, 
- * sticking to the cursor's position until the user moves the mouse past the speed threshold. 
- * When this happens, the goose is thrown off in the last direction the cursor was moving.
- */
 class ChaseState extends GooseState {
   enter() {
-    this.goose.speed = 120;
+    this.goose.speed = 150;
     this.goose.setAnimation(Goose.ANIMATIONS.ANGRY);
     this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
-    this.arrivedAtMouse = false;
+    // this.arrivedAtMouse = false;
     this.elapsedTime = 0;
-    this.timeLimit = 15; 
+    this.timeLimit = 15;
+    this.attackInterval = 1; // Delay before goose can bite/whack you
+    this.timeSinceLastAttack = 0;
     this.timeSinceLastHonk = 0;
     this.timeSinceLastTalk = 0;
     this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
     this.talkInterval = 8; // Talk every 8 seconds
 
-    // this.hitDelay = 1; // Delay before goose can whack you after entering chase state
-
     ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_INITIAL_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
-
-    // this.bat = new Bat(this.goose);
-    // ENGINE.addEntity(this.bat, GameEngine.DEPTH.FOREGROUND);
-
-    // ENGINE.addEntity(new AngrySymbol(this.goose), GameEngine.DEPTH.FOREGROUND);
   }
 
   update() {
@@ -177,23 +174,19 @@ class ChaseState extends GooseState {
 
     this.targetUserMouse();
 
-    // goose just arrived at mouse cursor
-    if (this.distanceToTarget < 10 && !this.arrivedAtMouse) {
-      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
-      this.setVelocity(0, 0);
-      this.arrivedAtMouse = true;
+    this.timeSinceLastAttack += ENGINE.clockTick;
+    if (this.distanceToTarget < 10 && this.timeSinceLastAttack >= this.attackInterval) {
+      this.timeSinceLastAttack = 0;
 
-      // if (this.elapsedTime > this.hitDelay) {
-      //   this.bat.whack();
-      // }
+      const chance = Math.random();
+      if (chance < 0.5) { // 50% chance of either bonk or bite
+        this.goose.setState(Goose.STATES.BONK);
+      } else {
+        this.goose.setState(Goose.STATES.BITE);
+      }
     }
     
-    // goose is chasing the mouse cursor
-    if (this.distanceToTarget > 20) {
-      if (this.arrivedAtMouse) {
-        this.goose.setAnimation(Goose.ANIMATIONS.ANGRY);
-        this.arrivedAtMouse = false;
-      }
+    if (this.distanceToTarget > 10) {
       this.moveToTarget();
 
       this.timeSinceLastHonk += ENGINE.clockTick;
@@ -213,10 +206,6 @@ class ChaseState extends GooseState {
   }
 
   targetUserMouse() {
-    // strategy #1: directly target mouse position
-    // this.setTarget(ENGINE.mouseX, ENGINE.mouseY);
-
-    // strategy #2:
     // interpolate target position to smooth out movement, 
     // making the goose look like its "reacting" to new mouse position
     const smoothingFactor = 0.03;
@@ -226,27 +215,18 @@ class ChaseState extends GooseState {
   }
 
   exit() {
-    // this.bat.kill();
   }
 }
 
-/* stick to user's mouse instead of just following
-
-class ChaseState extends GooseState {
+class BiteState extends GooseState {
   enter() {
-    this.goose.speed = 120;
-    this.goose.setAnimation(Goose.ANIMATIONS.ANGRY;
-    this.interpolatedPos = { x: this.goose.position.x, y: this.goose.position.y };
-    // this.arrivedAtMouse = false;
-    this.isStuckToMouse = false;
-    this.elapsedTime = 0;
-    this.timeLimit = 25;
-    this.timeSinceLastHonk = 0;
-    this.timeSinceLastTalk = 0;
-    this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
-    this.talkInterval = 8; // Talk every 8 seconds
+    Goose.ANIMATIONS.BITING.resetAnimation(); // Reset to first frame
+    this.goose.setAnimation(Goose.ANIMATIONS.BITING);
+    ASSET_MGR.playAudio(Goose.SFX.BITE, 0.5);
+    this.setVelocity(0, 0);
 
-    ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_INITIAL_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
+    this.elapsedTime = 0;
+    this.timeLimit = 5; // hang on for 5 seconds
   }
 
   update() {
@@ -255,68 +235,44 @@ class ChaseState extends GooseState {
       this.goose.setState(Goose.STATES.WANDER);
     }
 
-    this.targetUserMouse();
+    const xOffset = this.goose.facing === "right" ? -40 : 40;
 
-    if (this.distanceToTarget < 10 && !this.isStuckToMouse) { //&& !this.arrivedAtMouse
-      this.goose.setAnimation(Goose.ANIMATIONS.BOBBING;
-      //TODO instead of bobbing, trigger one-time "biting" animation
-      this.setVelocity(0, 0);
-      // this.arrivedAtMouse = true;
-      this.isStuckToMouse = true;
-    }
-    
-    if (this.distanceToTarget > 10) {
-      // if (this.arrivedAtMouse) {
-      //   this.goose.setAnimation(Goose.ANIMATIONS.ANGRY;
-      //   this.arrivedAtMouse = false;
-      // }
-      if (this.isStuckToMouse) {
-        this.goose.position.x = ENGINE.mouseX;
-        this.goose.position.y = ENGINE.mouseY;
-
-      } else {
-        this.moveToTarget();
-
-        this.timeSinceLastHonk += ENGINE.clockTick;
-        if (this.timeSinceLastHonk >= this.honkInterval) {
-          ASSET_MGR.playAudio(Goose.RANDOM_HONK_SFX());
-          ENGINE.addEntity(new Honk(this.goose), GameEngine.DEPTH.FOREGROUND);
-          this.timeSinceLastHonk = 0;
-          this.honkInterval = 0.5 + Math.random() * 2.5; // Honk every 0.5-3 seconds
-        }
-
-        this.timeSinceLastTalk += ENGINE.clockTick;
-        if (this.timeSinceLastTalk >= this.talkInterval) {
-          ENGINE.addEntity(new TextBox(this.goose, TextBox.RANDOM_UPDATE_CHASE_TEXT), GameEngine.DEPTH.FOREGROUND);
-          this.timeSinceLastTalk = 0;
-        }
-      }
-    }
-  }
-
-  targetUserMouse() {
-    // strategy #1: directly target mouse position
-    // this.setTarget(ENGINE.mouseX, ENGINE.mouseY);
-
-    // strategy #2:
-    // interpolate target position to smooth out movement, 
-    // making the goose look like its "reacting" to new mouse position
-    const smoothingFactor = 0.03;
-    this.interpolatedPos.x += (ENGINE.mouseX - this.interpolatedPos.x) * smoothingFactor;
-    this.interpolatedPos.y += (ENGINE.mouseY - this.interpolatedPos.y) * smoothingFactor;
-    this.setTarget(this.interpolatedPos.x, this.interpolatedPos.y);
-  }
-
-  exit() {
+    this.goose.position.x = ENGINE.mouseX + xOffset;
+    this.goose.position.y = ENGINE.mouseY;
   }
 }
-*/
+
+class BonkState extends GooseState {
+  enter() {
+    Goose.ANIMATIONS.BONKING.resetAnimation(); // Reset to first frame
+    this.goose.setAnimation(Goose.ANIMATIONS.BONKING);
+    ASSET_MGR.playAudio(Goose.SFX.BONK);
+    this.setVelocity(0, 0);
+
+    this.elapsedTime = 0;
+    this.timeLimit = 1;
+  }
+
+  update() {
+    this.elapsedTime += ENGINE.clockTick;
+    if (this.elapsedTime > this.timeLimit) {
+      this.goose.setState(Goose.STATES.WANDER);
+    }
+  }
+}
+
+
+
 
 class FlyState extends GooseState {
   enter() {
     this.goose.speed = 80;
     this.goose.setAnimation(Goose.ANIMATIONS.FLYING);
     this.goose.shadow.freezeHeight();
+    for (let gosling of this.goose.goslings) {
+      gosling.freeze();
+    }
+    
     
     // Store initial position for the return journey
     this.initialPos = { x: this.goose.position.x, y: this.goose.position.y + 10 };
@@ -377,6 +333,9 @@ class FlyState extends GooseState {
 
   exit() {
     this.goose.shadow.unfreezeHeight();
+    for (let gosling of this.goose.goslings) {
+      gosling.unfreeze();
+    }
   }
 }
 
@@ -454,6 +413,10 @@ class DanceState extends GooseState {
     this.discoBall = new DiscoBall(this.goose.position.x, this.goose.position.y - 100);
     ENGINE.addEntity(this.discoBall, GameEngine.DEPTH.FOREGROUND);
     this.discoBall.start();
+
+    for (let gosling of this.goose.goslings) {
+      gosling.setState(Gosling.STATES.DANCE);
+    }
   }
 
   update() {
@@ -466,6 +429,10 @@ class DanceState extends GooseState {
 
   exit() {
     this.discoBall.kill();
+
+    for (let gosling of this.goose.goslings) {
+      gosling.setState(Gosling.STATES.FOLLOW_PARENT);
+    }
   }
 }
 
@@ -595,10 +562,31 @@ class TrackMudState extends GooseState {
   }
 }
 
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 class DragMemesState extends GooseState {
   enter() {
+    if (this.goose.memeIndex > Goose.MEME_IMAGES.length - 1) {
+      // reshuffle memes and reset index
+      this.goose.memeIndex = 0;
+      this.goose.shuffled_memes = shuffle([...Goose.MEME_IMAGES]);
+
+      // ENGINE.addEntity(new TextBox(this.goose, "Looks like I'm all out of memes"), GameEngine.DEPTH.FOREGROUND);
+      // this.goose.setAnimation(Goose.ANIMATIONS.BOBBING);
+      // setTimeout(() => {
+      //   this.goose.setState(Goose.STATES.IDLE);
+      // }, 4000);
+      // return;
+    }
+
     this.goose.speed = 50;
-    this.goose.setAnimation(Goose.ANIMATIONS.WALKING);
+    this.goose.setAnimation(Goose.ANIMATIONS.DRAGGING);
     this.targetRandomLocation();
 
     // Create meme element
@@ -610,6 +598,14 @@ class DragMemesState extends GooseState {
   }
 
   update() {
+    if (!this.meme) return;
+
+    if (this.goose.velocity.x < 0) {
+      this.goose.facing = "right";
+    } else if (this.goose.velocity.x > 0) {
+      this.goose.facing = "left";
+    }
+
     if (this.distanceToTarget < 10) {
       this.setVelocity(0, 0);
       this.goose.setState(Goose.STATES.IDLE);
@@ -622,8 +618,15 @@ class DragMemesState extends GooseState {
 
   exit() {
     // in case state is cut short
-    if (this.meme.draggable) {
+    if (this.meme) {
       this.enableUserDrag();
+
+      // timer to remove meme from DOM
+      setTimeout(() => {
+        if (this.meme.parentNode) {
+          this.meme.parentNode.removeChild(this.meme);
+        }
+      }, 15000); 
     }
   }
 
@@ -634,22 +637,31 @@ class DragMemesState extends GooseState {
 
   createMemeElement() {
     const meme = document.createElement('img');
-    const imagePath = Goose.MEME_IMAGES[Math.floor(Math.random() * Goose.MEME_IMAGES.length)];
-    // console.log("Getting meme image:", chrome.runtime.getURL(imagePath));
+    const imagePath = this.goose.shuffled_memes[this.goose.memeIndex];
+    this.goose.memeIndex++;
     meme.src = chrome.runtime.getURL(imagePath);
     meme.className = 'goose-meme';
     meme.style.position = 'fixed';
     meme.style.zIndex = '9998';
     meme.style.cursor = 'move';
+
+    // Force a reload by adding a timestamp query parameter, getting around caching
+    // This ensures a fresh image is loaded each time
+    meme.src = chrome.runtime.getURL(imagePath) + '?t=' + Date.now();
     
     return meme;
   }
 
   updateMemePosition() {
-    const scrollX = window.scrollX || document.documentElement.scrollLeft;
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-    this.meme.style.left = `${this.goose.position.x + scrollX}px`;
-    this.meme.style.top = `${this.goose.position.y + scrollY}px`;
+    if (this.goose.facing === "left") {
+      this.meme.style.left = `${this.goose.position.x - this.meme.width}px`;
+      this.meme.style.right = 'auto';
+    } else {
+      this.meme.style.left = `${this.goose.position.x}px`;
+      this.meme.style.right = 'auto';
+    }
+
+    this.meme.style.top = `${this.goose.position.y}px`;
   }
 
   enableUserDrag() {
@@ -664,10 +676,8 @@ class DragMemesState extends GooseState {
     const offsetY = event.clientY - meme.getBoundingClientRect().top;
 
     const onMouseMove = (moveEvent) => {
-      const scrollX = window.scrollX || document.documentElement.scrollLeft;
-      const scrollY = window.scrollY || document.documentElement.scrollTop;
-      meme.style.left = `${moveEvent.clientX - offsetX + scrollX}px`;
-      meme.style.top = `${moveEvent.clientY - offsetY + scrollY}px`;
+      meme.style.left = `${moveEvent.clientX - offsetX}px`;
+      meme.style.top = `${moveEvent.clientY - offsetY}px`;
     };
 
     const onMouseUp = () => {
@@ -687,10 +697,10 @@ class LayEggState extends GooseState {
   enter() {
     this.goose.setAnimation(Goose.ANIMATIONS.LAYING_EGG);
     this.elapsedTime = 0;
-    this.layDuration = 1; // Lay egg for 6 seconds
+    this.layDuration = 7;
 
     // Create and add egg to game
-    this.goose.numChildren += 1;
+    this.goose.numChildren++;
     this.egg = new Egg(this.goose.position.x, this.goose.position.y, this.goose.numChildren, this.goose);
     ENGINE.addEntity(this.egg, GameEngine.DEPTH.BACKGROUND);
   }
@@ -699,8 +709,6 @@ class LayEggState extends GooseState {
     this.elapsedTime += ENGINE.clockTick;
 
     if (this.elapsedTime >= this.layDuration) {
-      // Egg is laid, now hatch it into a gooselet
-      this.egg.hatch();
       this.goose.setState(Goose.STATES.WANDER);
     }
   }
@@ -733,7 +741,14 @@ class Goose {
     this.currentState = null;
     this.previousState = null;
 
+    this.goslings = [];
     this.numChildren = 0;
+
+    this.hat = new Hat(this, Hat.HAT_TYPES.NONE);
+    ENGINE.addEntity(this.hat, GameEngine.DEPTH.FOREGROUND);
+
+    this.memeIndex = 0;
+    this.shuffled_memes = shuffle([...Goose.MEME_IMAGES]);
 
     if (DEBUG_MODE) {
       this.target = new Target(this);
@@ -752,7 +767,17 @@ class Goose {
     this.gooseOverlay.style.pointerEvents = 'auto';
     this.gooseOverlay.style.userSelect = 'none'; // prevent text selection
     this.gooseOverlay.style.backgroundColor = 'transparent'; // keep it invisible
+    this.gooseOverlay.style.cursor = 'pointer';
     document.body.appendChild(this.gooseOverlay);
+
+    this.isPremium = false;
+    this.premiumCheckComplete = false;
+    
+    const extPay = ExtPay('annoying-goose');
+    extPay.getUser().then(user => {
+      this.isPremium = user.paid;
+      this.premiumCheckComplete = true;
+    });
   }
 
   /**
@@ -763,7 +788,6 @@ class Goose {
     this.previousState = this.currentState;
 
     if (this.currentState?.exit) {
-      // console.log("Exiting current state: ", this.currentState);
       this.currentState.exit();
     }
 
@@ -778,7 +802,6 @@ class Goose {
     }
 
     if (this.currentState?.enter) {
-      // console.log("Entering new state: ", this.currentState);
       this.currentState.enter();
     }
   }
@@ -790,9 +813,12 @@ class Goose {
       Goose.ANIMATIONS.LAYING_EGG,
       Goose.ANIMATIONS.SWIMMING,
       Goose.ANIMATIONS.RUNNING,
-      Goose.ANIMATIONS.ANGRY
+      Goose.ANIMATIONS.ANGRY,
+      Goose.ANIMATIONS.BITING,
+      Goose.ANIMATIONS.DRAGGING
     ];
 
+    // temp until head pos system is implemented
     if (bendingDownAnimations.includes(animation)) {
       this.isBendingDown = true;
     } else {
@@ -864,8 +890,23 @@ class Goose {
       otherY < this.position.y + (Goose.FRAME_SIZE * Goose.SCALE / 2));
   }
 
-
-
+  getHeadPosition() {
+    const frameIndex = this.currentAnimation.currentFrame;
+    const anchors = this.currentAnimation.headAnchors;
+    
+    if (!anchors || !anchors[frameIndex]) {
+      console.error("No head anchor found for frame index:", frameIndex);
+      return { x: this.position.x, y: this.position.y - 32 }; // fallback
+    }
+    
+    const anchor = anchors[frameIndex];
+    const facingMultiplier = this.facing === "right" ? 1 : -1;
+    
+    return {
+      x: this.position.x + (anchor.x * facingMultiplier),
+      y: this.position.y + anchor.y
+    };
+  }
 
   // === CLASS CONSTANTS ===
 
@@ -882,7 +923,7 @@ class Goose {
   }
 
   static get SPRITESHEET() {
-    return "/images/sprites/goose.png";
+    return "/images/entities/goose.png";
   }
 
   static get SFX() {
@@ -891,7 +932,9 @@ class Goose {
       HONK2: "/audio/honk2.mp3",
       HONK3: "/audio/honk3.mp3",
       HONK_ECHO: "/audio/honk-echo.mp3",
-      SLAP: "/audio/slap.mp3"
+      SLAP: "/audio/slap.mp3",
+      BITE: "/audio/bite.mp3",
+      BONK: "/audio/bonk-doge.mp3",
     };
   }
 
@@ -912,24 +955,153 @@ class Goose {
     ];
   }
 
+  /*
+  NOTE:
+
+  The () at the end is immediately invoking the arrow function.
+
+  Example: instead of storing the function itself in BOBBING, 
+  you're storing the result of calling that function 
+  (the Animator object with the headAnchors property added).
+
+  This is a common pattern in JavaScript called an Immediately Invoked Function Expression (IIFE).
+  */
   static ANIMATIONS = {
-    BOBBING: new Animator(0, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.7),
-    LOOKING_AROUND: new Animator(1, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.7, false),
-    LOOKING_UP: new Animator(2, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 1, 0.7, false),
-    WALKING: new Animator(3, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2),
-    RUNNING: new Animator(4, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15),
-    FLYING: new Animator(5, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2),
-    SWIMMING: new Animator(6, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.5),
-    SHOOED: new Animator(7, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15),
-    DANCING: new Animator(8, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2),
-    ANGRY: new Animator(9, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15),
-    LAYING_EGG: new Animator(10, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.8),
+    BOBBING: (() => {
+      const anime = new Animator(0, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.7);
+      anime.headAnchors = [
+        {x: 10, y: -30}, // frame 0
+        {x: 10, y: -28}  // frame 1
+      ];
+      return anime;
+    })(),
+    LOOKING_AROUND: (() => {
+      const anime = new Animator(1, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.7, false);
+      anime.headAnchors = [
+        {x: 10, y: -32}, // frame 0
+        {x: 10, y: -32}, // frame 1
+        {x: 10, y: -32}  // frame 2
+      ];
+      return anime;
+    })(),
+    LOOKING_UP: (() => {
+      const anime = new Animator(2, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 1, 0.7, false);
+      anime.headAnchors = [
+        {x: 10, y: -32}  // frame 0
+      ];
+      return anime;
+    })(),
+    WALKING: (() => {
+      const anime = new Animator(3, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      anime.headAnchors = [
+        {x: 10, y: -30}, // frame 1
+        {x: 10, y: -30}, // frame 2
+        {x: 10, y: -30},  // frame 3
+        {x: 10, y: -30}, // frame 0
+      ];
+      return anime;
+    })(),
+    RUNNING: (() => {
+      const anime = new Animator(4, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      anime.headAnchors = [
+        {x: 18, y: -20}, // frame 0
+        {x: 18, y: -20}, // frame 1
+        {x: 18, y: -20}, // frame 2
+        {x: 18, y: -20}  // frame 3
+      ];
+      return anime;
+    })(),
+    FLYING: (() => {
+      const anime = new Animator(5, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      anime.headAnchors = [
+        {x: 10, y: -32}, // frame 0
+        {x: 10, y: -31}, // frame 1
+        {x: 10, y: -32}, // frame 2
+        {x: 10, y: -30}  // frame 3
+      ];
+      return anime;
+    })(),
+    SWIMMING: (() => {
+      const anime = new Animator(6, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.5);
+      anime.headAnchors = [
+        {x: 10, y: -14}, // frame 0
+        {x: 12, y: -14}  // frame 1
+      ];
+      return anime;
+    })(),
+    SHOOED: (() => {
+      const anime = new Animator(7, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      anime.headAnchors = [
+        {x: 10, y: -32}, // frame 0
+        {x: 10, y: -32}, // frame 1
+        {x: 10, y: -32}, // frame 2
+        {x: 10, y: -32}  // frame 3
+      ];
+      return anime;
+    })(),
+    DANCING: (() => {
+      const anime = new Animator(8, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.23);
+      anime.headAnchors = [
+        {x: -2, y: -32}, // frame 0
+        {x: 18, y: -10}, // frame 1
+        {x: 22, y: 10}, // frame 2
+        {x: 18, y: -10}  // frame 3
+      ];
+      return anime;
+    })(),
+    ANGRY: (() => {
+      const anime = new Animator(9, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      anime.headAnchors = [
+        {x: 20, y: -15}, // frame 0
+        {x: 18, y: -13}, // frame 1
+        {x: 20, y: -15}, // frame 2
+        {x: 18, y: -13}  // frame 3
+      ];
+      return anime;
+    })(),
+    LAYING_EGG: (() => {
+      const anime = new Animator(10, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.8);
+      anime.headAnchors = [
+        {x: 10, y: -14},  // frame 1
+        {x: 10, y: -14}, // frame 0
+      ];
+      return anime;
+    })(),
+    DRAGGING: (() => {
+      const anime = new Animator(11, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      anime.headAnchors = [
+        {x: 18, y: 8}, // frame 0
+        {x: 16, y: 6}, // frame 1
+        {x: 18, y: 8}, // frame 2
+        {x: 16, y: 6}  // frame 3
+      ];
+      return anime;
+    })(),
+    BITING: (() => {
+      const anime = new Animator(12, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.2, false);
+      anime.headAnchors = [
+        {x: 20, y: 0}, // frame 0
+        {x: 20, y: 0}, // frame 1
+      ];
+      return anime;
+    })(),
+    BONKING: (() => {
+      const anime = new Animator(13, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.1, false);
+      anime.headAnchors = [
+        {x: 0, y: -30}, // frame 0
+        {x: 0, y: -34}, // frame 1
+        {x: 0, y: -30}  // frame 2
+      ];
+      return anime;
+    })()
   }
 
   static STATES = {
     IDLE: IdleState,
     WANDER: WanderState,
     CHASE: ChaseState,
+    BITE: BiteState,
+    BONK: BonkState,
     FLY: FlyState,
     SWIM: SwimState,
     SHOOED: ShooedState,

@@ -125,7 +125,7 @@ class TextBox {
         if (!this.isClosing) {
             // Draw text inside the bubble
             CTX.save();
-            CTX.font = '10px "pixel-font"';
+            CTX.font = '10px "Silkscreen"';
             CTX.fillStyle = 'black';
             CTX.textAlign = 'left';
             CTX.textBaseline = 'middle';
@@ -144,7 +144,7 @@ class TextBox {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/textbox.png";
+        return "/images/entities/textbox.png";
     }
 
     static get SCALE() {
@@ -177,6 +177,10 @@ class TextBox {
             "I'm the boss around here.",
             "Hit me, I dare you!",
             "Your computer is my playground.",
+            "You have no idea what I'm capable of.",
+            "I successfully wasted your time.",
+            "This goose is on the loose.",
+            "HEY! I own this computer. Leave."
         ];
 
         return texts[Math.floor(Math.random() * texts.length)];
@@ -206,6 +210,27 @@ class TextBox {
             "You can't shake me!",
             "I'm not done with you yet!",
             "I'm not giving up!",
+        ];
+
+        return texts[Math.floor(Math.random() * texts.length)];
+    }
+
+    static get RANDOM_NEW_HAT_TEXT() {
+        const texts = [
+            "Pretty snazzy, eh?",
+            "I really like this one.",
+            "I'm feeling fancy today.",
+            "Not bad. Not bad at all.",
+            "*Looks in the mirror*",
+            "OH YEAH!",
+            "Clearly the best hat.",
+            "I look good. Really good.",
+            "Looking sharp.",
+            "A fine choice.",
+            "Never been a finer goose than me.",
+            "You like it?",
+            "For once you made a good decision.",
+            "I'm the best, aren't I?",
         ];
 
         return texts[Math.floor(Math.random() * texts.length)];

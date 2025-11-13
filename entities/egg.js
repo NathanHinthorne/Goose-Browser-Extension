@@ -44,10 +44,17 @@ class Egg {
             false                       // looped
         );
 
+        // wait 5 seconds, then hatch
+        setTimeout(() => {
+            this.hatch();
+        }, 5000);
+
         // Set up callback for when end animation completes
         this.hatchingAnimation.setOnComplete(() => {
             this.kill();
-            ENGINE.addEntity(new Gosling(this.position.x, this.position.y - 20, numChildren, parentGoose));
+            const gosling = new Gosling(this.position.x, this.position.y - 20, numChildren, parentGoose);
+            ENGINE.addEntity(gosling, GameEngine.DEPTH.FOREGROUND);
+            parentGoose.goslings.push(gosling);
         });
     }
 
@@ -83,7 +90,7 @@ class Egg {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/egg.png";
+        return "/images/entities/egg.png";
     }
 
     static get SFX() {

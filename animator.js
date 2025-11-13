@@ -145,8 +145,9 @@ class Animator {
      * @param {{width: number, height: number}} frameSize The size in pixels of the sprites in this animation.
      * @param {number} scale The scale of the image when it is drawn on the canvas.
      * @param {number} rotation The rotation of the sprite in radians.
+     * @param {number} frameIndex The index of the frame to draw. (Assumes single column of frames in the spritesheet)
      */
-    static drawStaticSprite(canvasX, canvasY, spritesheet, frameSize, scale, rotation = 0) {
+    static drawStaticSprite(canvasX, canvasY, spritesheet, frameSize, scale, rotation = 0, frameIndex = 0, facing = "right") {
         if (typeof frameSize === "number") {
             frameSize = { width: frameSize, height: frameSize };
         }
@@ -165,9 +166,15 @@ class Animator {
             CTX.translate(-canvasX, -canvasY);
         }
 
+        if (facing === "left") {
+            CTX.translate(canvasX, canvasY);
+            CTX.scale(-1, 1);
+            CTX.translate(-canvasX, -canvasY);
+        }
+
         CTX.drawImage(
             ASSET_MGR.getAsset(spritesheet),
-            0, 0,
+            0, frameIndex * frameSize.height, // x, y of the frame in the spritesheet
             frameSize.width, frameSize.height,
             centeredCanvasX, centeredCanvasY,
             displaySize.width, displaySize.height

@@ -1,79 +1,49 @@
-const paymentHTML = `
-<div id="payment-container" class="premium-upgrade">
-    <h3>Unlock Premium Goose</h3>
-    <p>Get additional behaviors and cosmetics for your desktop companion!</p>
-    <ul>
-        <li>🎩 Fancy hats and accessories</li>
-        <li>🏃‍♂️ New animations and movements</li>
-        <li>🎵 Honk sound effects</li>
-    </ul>
-    <button id="paymentButton" class="premium-button">
-        <span class="button-content">
-            <span class="price">$2</span>
-            <span class="text">Unlock Premium</span>
-        </span>
-    </button>
-</div>
-`;
+const extpay = ExtPay('annoying-goose'); 
 
-// Insert the payment HTML into your popup
-// document.body.insertAdjacentHTML('beforeend', paymentHTML);
+document.getElementById('premiumButton').addEventListener('click', function(evt) {
+    evt.preventDefault();
+    extpay.openPaymentPage();
+})
 
-// Payment integration logic
-// let paymentButton = document.getElementById('paymentButton');
-// let premiumFeatures = {
-//     enabled: false,
-//     cosmetics: ['topHat', 'bowtie', 'monocle'],
-//     behaviors: ['dance', 'spin', 'waddle'],
-//     sounds: ['honk1', 'honk2', 'honk3']
-// };
+document.getElementById('loginButton').addEventListener('click', function(evt) {
+    evt.preventDefault();
+    extpay.openLoginPage();
+})
 
-// const extPay = ExtPay('annoying-goose'); 
+extpay.getUser().then(user => {
+    if (user.paid) {
+        // User has premium - hide payment UI, show coffee container
+        document.getElementById('premiumContainer').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('coffeeContainer').style.display = 'block';
+        
+        // Show unlocked buttons
+        document.getElementById('hatsButton').style.display = 'block';
+        document.getElementById('statesButton').style.display = 'block';
+        document.getElementById('hatsButtonLocked').style.display = 'none';
+        document.getElementById('statesButtonLocked').style.display = 'none';
+    } else {
+        // User doesn't have premium - show payment UI
+        document.getElementById('premiumContainer').style.display = 'block';
+        document.getElementById('loginContainer').style.display = 'block';
+        document.getElementById('coffeeContainer').style.display = 'none';
+        
+        // Show locked buttons
+        document.getElementById('hatsButton').style.display = 'none';
+        document.getElementById('statesButton').style.display = 'none';
+        document.getElementById('hatsButtonLocked').style.display = 'block';
+        document.getElementById('statesButtonLocked').style.display = 'block';
+    }
+}).catch(err => {
+    // Show payment UI on error
+    document.getElementById('premiumContainer').style.display = 'block';
+    document.getElementById('loginContainer').style.display = 'block';
+})
 
-// Check payment status when popup opens
-// extPay.getUser().then(user => {
-//     if (user.paid) {
-//         enablePremiumFeatures();
-//     } else {
-//         setupPaymentButton();
-//     }
-// }).catch(err => {
-//     console.error('Failed to load payment status:', err);
-//     paymentButton.classList.add('disabled');
-// });
+extpay.onPaid.addListener(() => {
 
-// function setupPaymentButton() {
-//     paymentButton.addEventListener('click', () => {
-//         extPay.openPaymentPage();
-//     });
-
-//     // Listen for successful payments
-//     extPay.onPaymentSuccess(user => {
-//         enablePremiumFeatures();
-//     });
-// }
-
-// function enablePremiumFeatures() {
-//     premiumFeatures.enabled = true;
-    
-//     // Update UI
-//     paymentButton.innerHTML = '<span class="button-content">✨ Premium Unlocked!</span>';
-//     paymentButton.classList.add('unlocked');
-//     paymentButton.disabled = true;
-
-//     // Save premium status to storage
-//     chrome.storage.local.set({ premiumEnabled: true }, () => {
-//         // Notify content script about premium status
-//         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-//             chrome.tabs.sendMessage(tabs[0].id, {
-//                 command: "enablePremium",
-//                 features: premiumFeatures
-//             });
-//         });
-//     });
-// }
-
-
+    //? do we need to do anything, RIGHT when the user pays?
+});
 
 document.getElementById('startButton').addEventListener('click', () => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -82,6 +52,8 @@ document.getElementById('startButton').addEventListener('click', () => {
         chrome.storage.local.set({ [`gooseActive_${tabId}`]: true }, () => {
             document.getElementById('stopButton').disabled = false;
             document.getElementById('startButton').disabled = true;
+            document.getElementById('hatsButton').disabled = false;
+            document.getElementById('statesButton').disabled = false;
             window.close();
         });
     });
@@ -94,20 +66,13 @@ document.getElementById('stopButton').addEventListener('click', () => {
         chrome.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
             document.getElementById('stopButton').disabled = true;
             document.getElementById('startButton').disabled = false;
+            document.getElementById('hatsButton').disabled = true;
+            document.getElementById('statesButton').disabled = true;
             window.close();
         });
     });
 });
 
-document.getElementById('toggleStateSwapper').addEventListener('change', (event) => {
-    const enabled = event.target.checked;
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        const tabId = tabs[0].id;
-        chrome.storage.local.set({ [`stateSwapperEnabled_${tabId}`]: enabled }, () => {
-            chrome.tabs.sendMessage(tabId, { command: "toggleStateSwapper", enabled: enabled });
-        });
-    });
-});
 
                         
 // When popup opens, check the goose state and state swapper state
@@ -127,28 +92,113 @@ chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         'https://chromewebstore.google.com/',
     ];
 
-    // Disable popup if the URL matches any blocked site
     const isBlocked = blockedURLs.some(blocked => url.startsWith(blocked));
 
     if (isBlocked) {
         alert('Sorry, the goose cannot be activated on this page :(');
         document.getElementById('startButton').disabled = true;
         document.getElementById('stopButton').disabled = true;
-        document.getElementById('toggleStateSwapper').disabled = true;
+        document.getElementById('hatsButton').disabled = true;
+        document.getElementById('statesButton').disabled = true;
     } else {
-        chrome.storage.local.get([
-            `gooseActive_${tabId}`,
-            `stateSwapperEnabled_${tabId}`,
-            'premiumEnabled'
-        ], (result) => {
-            if (result[`gooseActive_${tabId}`]) {
-                document.getElementById('stopButton').disabled = false;
-                document.getElementById('startButton').disabled = true;
+        // Check if goose is actually running by sending a message
+        chrome.tabs.sendMessage(tabId, { command: "checkGooseStatus" }, (response) => {
+            if (chrome.runtime.lastError || !response || !response.isActive) {
+                // Goose is not running, reset storage and UI
+                chrome.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
+                    setInactiveState();
+                });
             } else {
-                document.getElementById('stopButton').disabled = true;
-                document.getElementById('startButton').disabled = false;
+                // Goose is running, set active state
+                setActiveState();
             }
-            document.getElementById('toggleStateSwapper').checked = result[`stateSwapperEnabled_${tabId}`];
+            
+            // Set toggle state regardless
+            chrome.storage.local.get([`stateSwapperEnabled_${tabId}`], (result) => {
+                const toggleButton = document.getElementById('statesButton');
+                if (result[`stateSwapperEnabled_${tabId}`]) {
+                    toggleButton.classList.add('checked');
+                } else {
+                    toggleButton.classList.remove('checked');
+                }
+            });
         });
     }
+});
+
+function setActiveState() {
+    document.getElementById('stopButton').disabled = false;
+    document.getElementById('startButton').disabled = true;
+    document.getElementById('hatsButton').disabled = false;
+    document.getElementById('statesButton').disabled = false;
+}
+
+function setInactiveState() {
+    document.getElementById('stopButton').disabled = true;
+    document.getElementById('startButton').disabled = false;
+    document.getElementById('hatsButton').disabled = true;
+    document.getElementById('statesButton').disabled = true;
+}
+
+document.getElementById('hatsButton').addEventListener('click', () => {
+    const panel = document.getElementById('hatsPanel');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        document.getElementById('statesPanel').style.display = 'none';
+    } else {
+        panel.style.display = 'none';
+    }
+});
+
+// Hat selection handlers
+document.querySelectorAll('.hat-square-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const hatType = parseInt(event.currentTarget.dataset.hat);
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            const tabId = tabs[0].id;
+            chrome.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
+        });
+        // Hide panel after selection
+        document.getElementById('hatsPanel').style.display = 'none';
+    });
+
+    //? Leave this in or take it out?
+    // button.addEventListener('mouseover', (event) => {
+    //     const hatType = parseInt(event.currentTarget.dataset.hat);
+    //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    //         const tabId = tabs[0].id;
+    //         chrome.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
+    //     });
+    // });
+});
+
+document.getElementById('statesButton').addEventListener('click', () => {
+    const panel = document.getElementById('statesPanel');
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        document.getElementById('hatsPanel').style.display = 'none';
+    } else {
+        panel.style.display = 'none';
+    }
+});
+
+// State selection handlers
+document.querySelectorAll('.state-square-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+        const stateName = event.currentTarget.dataset.state;
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            const tabId = tabs[0].id;
+            chrome.tabs.sendMessage(tabId, { command: "changeState", stateName: stateName });
+        });
+        // Hide panel after selection
+        document.getElementById('statesPanel').style.display = 'none';
+    });
+});
+
+// Locked button handlers
+document.getElementById('hatsButtonLocked').addEventListener('click', () => {
+    ASSET_MGR.playAudio(UI_SFX.CLINK1);
+});
+document.getElementById('statesButtonLocked').addEventListener('click', () => {
+    ASSET_MGR.playAudio(UI_SFX.CLINK1);
 });

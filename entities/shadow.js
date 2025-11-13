@@ -14,7 +14,11 @@ class Shadow {
 
     update() {
         if (this.goose.currentAnimation === Goose.ANIMATIONS.RUNNING ||
-            this.goose.currentAnimation === Goose.ANIMATIONS.DANCING) {
+            this.goose.currentAnimation === Goose.ANIMATIONS.DANCING ||
+            this.goose.currentAnimation === Goose.ANIMATIONS.DRAGGING ||
+            this.goose.currentAnimation === Goose.ANIMATIONS.BITING ||
+            this.goose.currentAnimation === Goose.ANIMATIONS.BONKING
+        ) {
             this.xOffset = -10;
         } else {
             this.xOffset = -5;
@@ -53,7 +57,7 @@ class Shadow {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/shadow.png";
+        return "/images/entities/shadow.png";
     }
 
     static get SCALE() {

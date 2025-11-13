@@ -4,6 +4,12 @@
 <head>
     <title>Annoying Goose</title>
     <style>
+        @font-face {
+            font-family: 'Silkscreen';
+            src: url('fonts/Silkscreen-Regular.ttf') format('truetype');
+            font-display: swap;
+        }
+
         :root {
             --primary-color: #efb934;
             --primary-dark: #e19834;
@@ -13,242 +19,110 @@
         }
 
         body {
+            font-family: 'Silkscreen', monospace;
+            font-size: 12px;
+            position: relative;
             width: 300px;
-            padding: 15px;
-            font-family: Arial, sans-serif;
-            font-family: 'DynaPuff', cursive;
+            padding: 10px;
             background-color: var(--bg-color);
             color: white;
         }
 
-        /* Image styles */
-        .corner-goose,
-        .footprints {
-            position: absolute;
-            opacity: 0.95;
-            pointer-events: none;
+
+        /* BUTTONS */
+        .custom-button {
+            position: relative;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
         }
 
-        .corner-goose {
-            bottom: 0;
-            right: 0;
-            width: 80px;
+        .button-frame {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: opacity 0.1s ease;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
 
-        .footprints {
-            top: 0;
-            right: 0;
-            height: 90px;
+        .button-frame.hovered,
+        .button-frame.clicked {
+            display: none;
         }
 
-        /* Button styles */
+        .custom-button:hover .button-frame.default  {
+            display: none;
+        }
+
+        .custom-button:hover .button-frame.hovered {
+            display: block;
+        }
+
+        .custom-button:active .button-frame.hovered {
+            display: none;
+        }
+
+        .custom-button:active .button-frame.clicked {
+            display: block;
+        }
+
+        .custom-button:disabled,
+        .toggle-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .custom-button:disabled:hover .button-frame.default {
+            display: block;
+        }
+
+        .custom-button:disabled:hover .button-frame.hovered {
+            display: none;
+        }
+
+        .custom-button:disabled:active .button-frame.default {
+            display: block;
+        }
+
+        .custom-button:disabled:active .button-frame.clicked {
+            display: none;
+        }
+
+        .custom-button.locked:hover .button-frame.default,
+        .custom-button.locked:hover .button-frame.hovered,
+        .custom-button.locked:hover .button-frame.clicked {
+            display: none;
+        }
+
+        .custom-button.locked:hover .button-frame.locked {
+            display: block;
+        }
+
+        .custom-button.locked:active .button-frame.default,
+        .custom-button.locked:active .button-frame.hovered,
+        .custom-button.locked:active .button-frame.clicked {
+            display: none;
+        }
+
+        .custom-button.locked:active .button-frame.locked {
+            display: block;
+        }
+
+        .custom-button.locked {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
         .button-container {
             display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .preset-button,
-        .start-button,
-        .stop-button {
-            background: var(--button-bg);
-            color: var(--bg-color);
-            border: 2px solid var(--button-border);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .preset-button {
-            flex: 1;
-            padding: 10px;
-            font-size: 12px;
-        }
-
-        .start-button {
-            width: 100%;
-            margin-top: 15px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .stop-button {
-            width: 100%;
-            margin-top: 15px;
-            padding: 12px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .preset-button:hover,
-        .start-button:hover {
-            background: var(--primary-color);
-            border-color: var(--primary-dark);
-            color: white;
-        }
-
-        .stop-button:hover {
-            background: #e61f1f;
-        }
-
-        .start-button:disabled,
-        .stop-button:disabled,
-        .preset-button:disabled {
-            background: #ccc;
-            border-color: #bbb;
-            color: #a5a5a5;
-            cursor: not-allowed;
-        }
-
-        /* Toggle switch styles */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 17px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 17px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 13px;
-            width: 13px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(13px);
-        }
-
-        label {
-            font-size: 14px;
-        }
-
-
-        /* PREMIUM SECTION */
-        .premium-upgrade {
-            padding: 20px;
-            background: linear-gradient(145deg, #ffffff 0%, #f5f5f5 100%);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            margin: 20px auto;
-        }
-
-        .premium-upgrade h3 {
-            color: #2d3748;
-            margin: 0 0 12px 0;
-            font-size: 18px;
-        }
-
-        .premium-upgrade p {
-            color: #4a5568;
-            margin: 0 0 16px 0;
-            font-size: 14px;
-        }
-
-        .premium-upgrade ul {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 20px 0;
-        }
-
-        .premium-upgrade li {
-            color: #4a5568;
-            font-size: 14px;
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .premium-button {
-            width: 100%;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .premium-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.2);
-        }
-
-        .premium-button:active {
-            transform: translateY(0);
-        }
-
-        .button-content {
-            display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 8px;
-            color: white;
-            font-weight: 600;
-        }
-
-        .price {
-            font-size: 16px;
-        }
-
-        .text {
-            font-size: 14px;
-        }
-
-        .premium-button.disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
-
-        /* Add animation for unlocked state */
-        @keyframes unlocked {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .unlocked {
-            animation: unlocked 0.5s ease-in-out;
+            text-align: center;
         }
 
         .coffee-container {
@@ -262,30 +136,488 @@
             width: 50%;
             max-width: 300px;
         }
+
+        #helpContainer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        #startButton,
+        #stopButton {
+            width: 280px;
+            height: auto;
+            display: inline-block;
+        }
+
+        #loginContainer,
+        #premiumContainer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        #premiumButton {
+            width: 280px;
+            height: auto;
+            display: inline-block;
+
+            /* override default margin to ensure text is closer to button */
+            margin-top: -5px;
+        }
+
+        #loginButton {
+            width: 130px;
+            height: auto;
+            display: inline-block;
+
+            /* override default margin to ensure text is closer to button */
+            margin-top: -5px;
+        }
+
+        #statesButton,
+        #statesButtonLocked {
+            width: 150px;
+            height: auto;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        #hatsButton,
+        #hatsButtonLocked {
+            width: 100px;
+            height: auto;
+            display: inline-block;
+        }
+
+        .hats-panel {
+            margin-top: 15px;
+            padding: 15px;
+            background-image: url('images/ui/hats-panel-bg.png');
+            background-size: cover;
+            border-radius: 12px;
+
+            /* turn off smoothing */
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .hats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 8px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        .hat-square-button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .hat-square-button .button-frame {
+            width: 70px;
+            height: 70px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .hat-square-button .button-frame.hovered,
+        .hat-square-button .button-frame.clicked {
+            display: none;
+        }
+
+        .hat-square-button:hover .button-frame.default {
+            display: none;
+        }
+
+        .hat-square-button:hover .button-frame.hovered {
+            display: block;
+        }
+
+        .hat-square-button:active .button-frame.hovered {
+            display: none;
+        }
+
+        .hat-square-button:active .button-frame.clicked {
+            display: block;
+        }
+
+        .hat-preview {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background-image: url('images/entities/hats.png');
+            background-size: 40px;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            pointer-events: none;
+        }
+
+        .title-container {
+            position: relative;
+            margin: 0 auto;
+            width: 250px;
+        }
+
+        .title-image {
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        /* Toggle button styles */
+        .toggle-button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+        }
+
+        .toggle-button .button-frame {
+            width: 250px;
+            height: auto;
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .states-panel {
+            margin-top: 15px;
+            padding: 15px;
+            background-image: url('images/ui/states-panel-bg.png');
+            background-size: cover;
+            border-radius: 12px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .states-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        .state-square-button {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .state-square-button .button-frame {
+            width: 70px;
+            height: 70px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .state-square-button .button-frame.hovered,
+        .state-square-button .button-frame.clicked {
+            display: none;
+        }
+
+        .state-square-button:hover .button-frame.default {
+            display: none;
+        }
+
+        .state-square-button:hover .button-frame.hovered {
+            display: block;
+        }
+
+        .state-square-button:active .button-frame.hovered {
+            display: none;
+        }
+
+        .state-square-button:active .button-frame.clicked {
+            display: block;
+        }
+
+        .state-preview {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            background-size: 32px;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body>
-    <img src="images/ui/perfect-goose.png" class="corner-goose" alt="goose">
-    <img src="images/ui/footprints4.png" class="footprints" alt="footprints">
-    <h2>Annoying Goose</h2>
-    <button id="startButton" class="start-button">Start Goose</button>
-    <button id="stopButton" class="stop-button">VAPORIZE GOOSE!</button>
-    <div style="margin-top: 15px;">
-        <label class="toggle-switch">
-            <input type="checkbox" id="toggleStateSwapper">
-            <span class="slider"></span>
-        </label>
-        <label for="toggleStateSwapper">Show State Swapper </label>
+    <div class="title-container">
+        <img src="images/ui/title2.png" class="title-image" alt="Annoying Goose">
+    </div>
+    <div class="button-container">
+        <button id="startButton" class="custom-button">
+            <img src="images/ui/start-default.png" class="button-frame default" alt="Start Goose">
+            <img src="images/ui/start-hovered.png" class="button-frame hovered" alt="Start Goose">
+            <img src="images/ui/start-clicked.png" class="button-frame clicked" alt="Start Goose">
+        </button>
+    </div>
+    <div class="button-container">
+        <button id="stopButton" class="custom-button">
+            <img src="images/ui/stop-default.png" class="button-frame default" alt="Vaporize Goose">
+            <img src="images/ui/stop-hovered.png" class="button-frame hovered" alt="Vaporize Goose">
+            <img src="images/ui/stop-clicked.png" class="button-frame clicked" alt="Vaporize Goose">
+        </button>
     </div>
 
-    <!-- Buy me a coffee -->
-    <div class="coffee-container">
+    <div class="button-container">
+        <div id="statesButtonContainer">
+            <!-- Locked Button: Displayed when not paid -->
+            <button id="statesButtonLocked" class="custom-button" style="display: none;">
+                <img src="images/ui/states-locked.png" class="button-frame default">
+                <img src="images/ui/states-locked-hovered.png" class="button-frame hovered">
+                <img src="images/ui/states-locked-clicked.png" class="button-frame clicked">
+            </button>
+    
+             <!-- Unlocked Button: Displayed when paid -->
+            <button id="statesButton" class="custom-button" style="display: none;">
+                <img src="images/ui/states-default.png" class="button-frame default">
+                <img src="images/ui/states-hovered.png" class="button-frame hovered">
+                <img src="images/ui/states-clicked.png" class="button-frame clicked">
+            </button>
+        </div>
+
+        <div id="hatsButtonContainer">
+            <!-- Locked Button: Displayed when not paid -->
+             <button id="hatsButtonLocked" class="custom-button hats-button" style="display: none;">
+                 <img src="images/ui/hats-locked.png" class="button-frame default">
+                 <img src="images/ui/hats-locked-hovered.png" class="button-frame hovered">
+                 <img src="images/ui/hats-locked-clicked.png" class="button-frame clicked">
+             </button>
+    
+            <!-- Unlocked Button: Displayed when paid -->
+            <button id="hatsButton" class="custom-button hats-button" style="display: none;">
+                <img src="images/ui/hats-default.png" class="button-frame default">
+                <img src="images/ui/hats-hovered.png" class="button-frame hovered">
+                <img src="images/ui/hats-clicked.png" class="button-frame clicked">
+            </button>
+        </div>
+    </div>
+
+
+    <div id="hatsPanel" class="hats-panel" style="display: none;">
+        <div class="hats-grid">
+            <button class="hat-square-button" data-hat="0">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 1">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 1">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 1">
+                <div class="hat-preview" style="background-position: 0 0;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="1">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 2">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 2">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 2">
+                <div class="hat-preview" style="background-position: 0 -40px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="2">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 3">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 3">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 3">
+                <div class="hat-preview" style="background-position: 0 -80px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="3">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 4">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 4">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 4">
+                <div class="hat-preview" style="background-position: 0 -120px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="4">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 5">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 5">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 5">
+                <div class="hat-preview" style="background-position: 0 -160px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="5">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 6">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 6">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 6">
+                <div class="hat-preview" style="background-position: 0 -200px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="6">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 7">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 7">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 7">
+                <div class="hat-preview" style="background-position: 0 -240px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="7">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 8">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 8">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 8">
+                <div class="hat-preview" style="background-position: 0 -280px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="8">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 9">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 9">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 9">
+                <div class="hat-preview" style="background-position: 0 -320px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="9">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 10">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 10">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 10">
+                <div class="hat-preview" style="background-position: 0 -360px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="10">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 11">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 11">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 11">
+                <div class="hat-preview" style="background-position: 0 -400px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="11">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 12">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 12">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 12">
+                <div class="hat-preview" style="background-position: 0 -440px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="12">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 13">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 13">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 13">
+                <div class="hat-preview" style="background-position: 0 -480px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="13">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 14">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 14">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 14">
+                <div class="hat-preview" style="background-position: 0 -520px;"></div>
+            </button>
+            <button class="hat-square-button" data-hat="14">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 15">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 15">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 15">
+                <div class="hat-preview" style="background-position: 0 -560px;"></div>
+            </button>
+        </div>
+    </div>
+
+    <div id="statesPanel" class="states-panel" style="display: none;">
+        <div class="states-grid">
+            <button class="state-square-button" data-state="IDLE">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Idle">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Idle">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Idle">
+                <img src="images/ui/state-preview-idle.png" class="state-preview" alt="Idle Preview">
+            </button>
+            <button class="state-square-button" data-state="WANDER">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Wander">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Wander">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Wander">
+                <img src="images/ui/state-preview-wander.png" class="state-preview" alt="Wander Preview">
+            </button>
+            <button class="state-square-button" data-state="CHASE">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Chase">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Chase">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Chase">
+                <img src="images/ui/state-preview-chase.png" class="state-preview" alt="Chase Preview">
+            </button>
+            <button class="state-square-button" data-state="FLY">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Fly">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Fly">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Fly">
+                <img src="images/ui/state-preview-fly.png" class="state-preview" alt="Fly Preview">
+            </button>
+            <button class="state-square-button" data-state="SWIM">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Swim">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Swim">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Swim">
+                <img src="images/ui/state-preview-swim.png" class="state-preview" alt="Swim Preview">
+            </button>
+            <button class="state-square-button" data-state="DANCE">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Dance">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Dance">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Dance">
+                <img src="images/ui/state-preview-dance.png" class="state-preview" alt="Dance Preview">
+            </button>
+            <button class="state-square-button" data-state="TRACK_MUD">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Track Mud">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Track Mud">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Track Mud">
+                <img src="images/ui/state-preview-track-mud.png" class="state-preview" alt="Track Mud Preview">
+            </button>
+            <button class="state-square-button" data-state="DRAG_MEMES">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Drag Memes">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Drag Memes">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Drag Memes">
+                <img src="images/ui/state-preview-drag-memes.png" class="state-preview" alt="Drag Memes Preview">
+            </button>
+            <button class="state-square-button" data-state="LAY_EGG">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Lay Egg">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Lay Egg">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Lay Egg">
+                <img src="images/ui/state-preview-lay-egg.png" class="state-preview" alt="Lay Egg Preview">
+            </button>
+        </div>
+    </div>
+
+    <div id="premiumContainer" style="display: none;">
+        <p>Give the goose hats, control its actions, and unlock baby goslings!</p>
+        <button id="premiumButton" class="custom-button">
+            <img src="images/ui/premium-default.png" class="button-frame default">
+            <img src="images/ui/premium-hovered.png" class="button-frame hovered">
+            <img src="images/ui/premium-clicked.png" class="button-frame clicked">
+        </button>
+    </div>
+
+    <div id="loginContainer" style="display: none;">
+        <p>Already a premium user? Log in below!</p>
+        <button id="loginButton" class="custom-button">
+            <img src="images/ui/login-default.png" class="button-frame default">
+            <img src="images/ui/login-hovered.png" class="button-frame hovered">
+            <img src="images/ui/login-clicked.png" class="button-frame clicked">
+        </button>
+    </div>
+
+    <!-- TODO: Make button under premium button that says:
+     
+    "Want revenge? Check out Goose Hunt!" 
+
+    OR call it "Goose Takedown" or "Goose Showdown" -->
+    
+    <div id="helpContainer">
+        <p>Experiencing issues? Contact the developer at:</p>
+        <p><a href="mailto:skywardappstudio@gmail.com" style="color: var(--primary-color); text-decoration: underline;">skywardappstudio@gmail.com</a></p>
+    </div>
+
+    <div id="coffeeContainer" class="coffee-container" style="display: none;">
         <a href="https://www.buymeacoffee.com/nathanrh85d" target="_blank">
             <img src="./images/ui/bmc-button.svg" alt="Buy Me A Coffee">
         </a>
     </div>
 
+
+    <script src="ExtPay.js"></script>
     <script src="popup.js"></script>
 </body>
 

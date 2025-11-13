@@ -1,6 +1,7 @@
 // ====== SETUP =======
 
 const DEBUG_MODE = false;
+const FORCE_CHROMEOS_MODE = true;
 
 let CANVAS;
 let CTX;
@@ -9,13 +10,14 @@ let ASSET_MGR;
 
 let isInitialized = false;
 let stateSwapperPanel;
+const extpay = ExtPay('annoying-goose');
 
 function initializeEnvironment() {
   if (isInitialized) return;
 
   // load via chrome API
   const fullPath = chrome.runtime.getURL('fonts/Silkscreen-Regular.ttf');
-  const pixelFont = new FontFace('pixel-font', 'url(' + fullPath + ')');
+  const pixelFont = new FontFace('Silkscreen', 'url(' + fullPath + ')');
 
   pixelFont.load().then(function (font) {
     document.fonts.add(font);
@@ -42,7 +44,17 @@ function initializeEnvironment() {
   document.body.appendChild(CANVAS);
 
   /** The tool we use to draw on CANVAS. */
-  CTX = CANVAS.getContext("2d");
+  CTX = CANVAS.getContext("2d", {
+    alpha: true,
+    desynchronized: true, // Better performance on ChromeOS
+    willReadFrequently: false // Optimize for drawing, not reading
+  });
+  
+  // Test canvas capabilities
+  if (!CTX || typeof CTX.drawImage !== 'function') {
+    console.error('Canvas context not properly initialized on ChromeOS');
+    return;
+  }
   CTX.imageSmoothingEnabled = false; // Disable image smoothing for pixel art
 
   // Set canvas dimensions to match the viewport
@@ -55,8 +67,6 @@ function initializeEnvironment() {
   /** The AssetManager which contains all images and sound. */
   ASSET_MGR = new AssetManager();
   queueAssets();
-  
-  createStateSwapperPanel();
 
   if (DEBUG_MODE) {
     console.info("Debug mode enabled.");
@@ -66,18 +76,34 @@ function initializeEnvironment() {
 
   // Keep track of when user minimizes the window
   document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  // Add comprehensive ChromeOS debugging
+  if (DEBUG_MODE && (/\bCrOS\b/.test(navigator.userAgent) || FORCE_CHROMEOS_MODE)) {
+    console.log('ChromeOS Debug Info:', {
+      devicePixelRatio: window.devicePixelRatio,
+      canvasSupport: !!document.createElement('canvas').getContext,
+      webglSupport: !!document.createElement('canvas').getContext('webgl'),
+      memoryInfo: navigator.deviceMemory || 'unknown'
+    });
+  }
 };
 
 function resizeCanvas() {
-  // Set actual canvas resolution
-  CANVAS.width = window.innerWidth * window.devicePixelRatio;
-  CANVAS.height = window.innerHeight * window.devicePixelRatio;
-
-  // Scale the context to counter the resolution scaling
-  CTX.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-  // Reset image smoothing after context changes
+  // ChromeOS-friendly scaling
+  const pixelRatio = window.devicePixelRatio || 1;
+  const maxPixelRatio = 2; // Cap pixel ratio for ChromeOS performance
+  const effectiveRatio = Math.min(pixelRatio, maxPixelRatio);
+  
+  CANVAS.width = window.innerWidth * effectiveRatio;
+  CANVAS.height = window.innerHeight * effectiveRatio;
+  
+  CTX.scale(effectiveRatio, effectiveRatio);
   CTX.imageSmoothingEnabled = false;
+  
+  // ChromeOS-specific canvas context settings
+  if (/\bCrOS\b/.test(navigator.userAgent) || FORCE_CHROMEOS_MODE) {
+    CTX.imageSmoothingQuality = 'low'; // Better performance
+  }
 }
 
 function queueAssets() {
@@ -86,6 +112,8 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Goose.SFX.HONK3);
   ASSET_MGR.queueDownload(Goose.SFX.HONK_ECHO);
   ASSET_MGR.queueDownload(Goose.SFX.SLAP);
+  ASSET_MGR.queueDownload(Goose.SFX.BITE);
+  ASSET_MGR.queueDownload(Goose.SFX.BONK);
   ASSET_MGR.queueDownload(Goose.SPRITESHEET);
   ASSET_MGR.queueDownload(Shadow.SPRITESHEET);
   ASSET_MGR.queueDownload(Egg.SPRITESHEET);
@@ -96,7 +124,6 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Gosling.SFX.PEEP3);
   ASSET_MGR.queueDownload(TextBox.SPRITESHEET);
   ASSET_MGR.queueDownload(Honk.SPRITESHEET);
-  ASSET_MGR.queueDownload(AngrySymbol.SPRITESHEET);
   ASSET_MGR.queueDownload(Target.SPRITESHEET);
   ASSET_MGR.queueDownload(Puddle.SPRITESHEET);
   ASSET_MGR.queueDownload(Puddle.SFX.SPLASH);
@@ -105,9 +132,7 @@ function queueAssets() {
   ASSET_MGR.queueDownload(Footprints.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SPRITESHEET);
   ASSET_MGR.queueDownload(DiscoBall.SFX.DANCE);
-  ASSET_MGR.queueDownload(Bat.SPRITESHEET);
-  ASSET_MGR.queueDownload(Bat.SFX.BONK);
-
+  ASSET_MGR.queueDownload(Hat.SPRITESHEET);
 }
 
 
@@ -152,60 +177,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: false });
       sendResponse({ status: "stoppedGoose" });
       break;
-    
-    case "toggleStateSwapper":
-      if (message.enabled) {
-        showStateSwapperPanel();
-      } else {
-        hideStateSwapperPanel();
+
+    case "changeHat":
+      if (Goose.instance && Goose.instance.hat) {
+        Goose.instance.hat.setHatType(message.hatType);
       }
-      sendResponse({ status: "stateSwapperToggled" });
+      sendResponse({ status: "hatChanged" });
+      break;
+
+    case "checkGooseStatus":
+      sendResponse({ isActive: !!Goose.instance });
+      break;
+
+    case "changeState":
+      if (Goose.instance) {
+        Goose.instance.setState(Goose.instance.constructor.STATES[message.stateName]);
+      }
+      sendResponse({ status: "stateChanged" });
       break;
   }
   return true;  // Indicates we wish to send a response asynchronously
 });
-
-function createStateSwapperPanel() {
-  stateSwapperPanel = document.createElement('div');
-  stateSwapperPanel.className = 'state-panel';
-
-  // Header
-  const header = document.createElement('div');
-  header.className = 'state-panel-header';
-  const title = document.createElement('h2');
-  title.className = 'state-panel-title';
-  title.textContent = '🪿 Goose State Swapper';
-  header.appendChild(title);
-  stateSwapperPanel.appendChild(header);
-
-  // Content
-  const content = document.createElement('div');
-  content.className = 'state-panel-content';
-
-  // State buttons
-  ['IDLE', 'WANDER', 'CHASE', 'FLY', 'SWIM', 'DANCE', 'TRACK_MUD', 'DRAG_MEMES', 'LAY_EGG'].forEach(stateName => {
-    const button = document.createElement('button');
-    button.className = 'state-button';
-    button.textContent = stateName;
-    button.onclick = () => {
-      if (Goose.instance) {
-        Goose.instance.setState(Goose.instance.constructor.STATES[stateName]);
-      } else {
-        console.error('Goose instance not found');
-      }
-    };
-    content.appendChild(button);
-  });
-
-  stateSwapperPanel.appendChild(content);
-  document.body.appendChild(stateSwapperPanel);
-  
-  if (DEBUG_MODE) {
-    showStateSwapperPanel();
-  } else {
-    hideStateSwapperPanel();
-  }
-}
 
 function showStateSwapperPanel() {
   if (stateSwapperPanel) {

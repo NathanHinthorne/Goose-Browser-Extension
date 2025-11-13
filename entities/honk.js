@@ -1,15 +1,12 @@
 class Honk {
     constructor(goose) {
-        // Position offsets from goose
-        this.xOffsetHighNeck = 32;
-        this.yOffsetHighNeck = -10;
-        this.xOffsetLowNeck = 40;
-        this.yOffsetLowNeck = 2;
-
         this.position = {
-            x: goose.position.x + this.xOffset,
-            y: goose.position.y + this.yOffsetHigh
+            x: goose.position.x,
+            y: goose.position.y
         };
+
+        this.xOffset = 20;
+        this.yOffset = 20;
         
         this.goose = goose;
         
@@ -31,22 +28,9 @@ class Honk {
     }
 
     update() {
-        // Sync position to goose, adjusting xOffset based on facing direction
-        if (this.goose.isBendingDown) {
-            if (this.goose.facing === "right") {
-                this.position.x = this.goose.position.x + this.xOffsetLowNeck;
-            } else {
-                this.position.x = this.goose.position.x - this.xOffsetLowNeck;
-            }
-            this.position.y = this.goose.position.y + this.yOffsetLowNeck;
-        } else {
-            if (this.goose.facing === "right") {
-                this.position.x = this.goose.position.x + this.xOffsetHighNeck;
-            } else {
-                this.position.x = this.goose.position.x - this.xOffsetHighNeck;
-            }
-            this.position.y = this.goose.position.y + this.yOffsetHighNeck;
-        }
+        const headPos = this.goose.getHeadPosition();
+        this.position.x = headPos.x + (this.goose.facing === "right" ? this.xOffset : -this.xOffset);
+        this.position.y = headPos.y + this.yOffset;
     }
 
     draw() {
@@ -58,7 +42,7 @@ class Honk {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/honk.png";
+        return "/images/entities/honk.png";
     }
 
     static get SCALE() {

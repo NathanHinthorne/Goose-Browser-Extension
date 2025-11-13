@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Annoying Goose",
-  "version": "1.5",
-  "description": "A playful goose that will enhance your browsing experience with some crazy antics.",
+  "version": "1.6",
+  "description": "A playful goose that will enhance your browsing experience with its crazy antics.",
   "permissions": ["storage", "tabs"],
   "host_permissions": [
     "<all_urls>"
@@ -23,10 +23,17 @@
     "62": "images/ui/goose62.png",
     "124": "images/ui/goose124.png"
   },
-  "content_scripts": [{
+  "content_scripts": [
+    {
+      "matches": ["https://extensionpay.com/*"],
+      "js": ["ExtPay.js"],
+      "run_at": "document_start"
+    },
+    {
     "matches": ["<all_urls>"],
     "css": ["styles.css"],
       "js": [
+        "ExtPay.js",
         "main.js",
         "engine.js",
         "timer.js",
@@ -43,12 +50,12 @@
         "entities/discoBall.js",
         "entities/footprints.js",
         "entities/mud.js",
-        "entities/bat.js",
-        "entities/angrySymbol.js"
+        "entities/hat.js"
       ],
     "all_frames": true,
     "run_at": "document_idle"
-  }],
+    }
+  ],
   "web_accessible_resources": [{
     "resources": [
       "images/*", 

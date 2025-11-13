@@ -19,6 +19,16 @@ A pixel art goose that wanders around your screen and does random stuff. You cou
 
 ### 📅 VERSION HISTORY
 
+=== Version 1.6 ===
+
+- Bug fixes related to ChromeOS
+- Added hats for the goose
+- Fixed bug in goose's "lay egg" state
+- Added "drag memes" state
+- Added chance for the goose to either bite or bonk you once it catches up to your mouse pointer
+- New pixel artwork for extension popup
+- Premium mode
+
 === Version 1.5 ===
 
 - Punch sound effect when goose is clicked.
@@ -57,10 +67,6 @@ A pixel art goose that wanders around your screen and does random stuff. You cou
 - Volume slider in popup
 
 - Minigame (will take a lot of time)
-  - Whenever the goose is active, make a random chance for tickets (looks like a dollar bill with a goose face on it) to appear randomly on the screen. When clicked, add a ticket to user's OVERALL storage (not just the current tab).
+  - Whenever the goose is active, make a random chance golden goose eggs to appear randomly on the screen. When clicked, immediately enter the minigame, with circle closing inwards around the egg as a screen transition.
   
-  - In the extension popup, make a grayed out button that says "Play Minigame" with a ticket icon. When clicked, use up a ticket and open a new tab with the minigame where the user controls a goose with arrows keys in (1) a platformer style game to collect coins or (2) a flappy bird style game to avoid obstacles (with a coin counter going up for each obstacle avoided). The coins are the real currency and will be used for clothing items for the goose.
-
-## Goose State Diagram
-
-![Goose State Diagram](images/github/state-diagram.png)
+  - In the extension popup, make a grayed out button that says "Play Minigame" with a ticket icon. When clicked, use up a ticket and open a new tab with the minigame where the user controls a goose with arrows keys in (1) a platformer style game to collect coins/bills with a goose face on them or (2) a flappy bird style game to avoid obstacles (with a counter going up for each obstacle avoided). The coins/bills are the currency which will be used for clothing items for the goose.

@@ -44,29 +44,29 @@ class GoslingState {
   }
 }
 
-class NothingState extends GoslingState {
+class GoslingNothingState extends GoslingState {
     enter() {
-        this.gosling.setAnimation(Gosling.ANIMATIONS.BOBBING);
+        this.gosling.setAnimation(this.gosling.animations.BOBBING);
         this.gosling.speed = 0;
     }
 
     update() {
         this.setTarget(this.gosling.targetPos.x, this.gosling.targetPos.y);
 
-        if (this.distanceToTarget > 20) {
+        if (!this.gosling.frozen && this.distanceToTarget > 20) {
             this.gosling.setState(Gosling.STATES.FOLLOW_PARENT);
         }
     }
 }
 
-class FollowParentState extends GoslingState {
+class GoslingFollowState extends GoslingState {
     constructor(gosling) {
         super(gosling);
         this.peepChance = 0.06 / GameEngine.FPS; // 6% chance a second
     }
 
     enter() {
-        this.gosling.setAnimation(Gosling.ANIMATIONS.WALKING);
+        this.gosling.setAnimation(this.gosling.animations.WALKING);
         this.gosling.speed = 30;
     }
 
@@ -92,14 +92,14 @@ class FollowParentState extends GoslingState {
 /**
  * Runs after parent goose until it gets close enough to the parent goose
  */
-class ChaseParentState extends GoslingState {
+class GoslingChaseState extends GoslingState {
     constructor(gosling) {
         super(gosling);
         this.peepChance = 0.15 / GameEngine.FPS; // 15% chance a second
     }
 
     enter() {
-        this.gosling.setAnimation(Gosling.ANIMATIONS.RUNNING);
+        this.gosling.setAnimation(this.gosling.animations.RUNNING);
         this.gosling.speed = 90;
     }
     
@@ -121,12 +121,24 @@ class ChaseParentState extends GoslingState {
     }
 }
 
+class GoslingDanceState extends GoslingState {
+    enter() {
+        this.gosling.setAnimation(this.gosling.animations.DANCING);
+        this.peepChance = 0.15 / GameEngine.FPS; // 15% chance a second
+    }
+
+    update() {
+        if (Math.random() < this.peepChance) {
+            ASSET_MGR.playAudio(Gosling.RANDOM_PEEP_SFX());
+        }
+    }
+}
+
 
 class Gosling {
     constructor(x, y, childNumber, parentGoose) {
         this.parentGoose = parentGoose;
         this.position = { x, y };
-        this.setState(Gosling.STATES.FOLLOW_PARENT);
         this.trailingDistance = (childNumber * 30) + 10;
         this.trailingX = 0;
         this.trailingY = 0;
@@ -134,11 +146,14 @@ class Gosling {
         this.youngDuration = 120; // 2 minutes
         this.elapsedTime = 0;
 
-        // this.target = new Target(this);
-        // ENGINE.addEntity(this.target, GameEngine.DEPTH.FOREGROUND);
+        this.animations = {
+            BOBBING: new Animator(0, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 2, 0.7),
+            WALKING: new Animator(1, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 4, 0.2),
+            RUNNING: new Animator(2, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 4, 0.15),
+            DANCING: new Animator(3, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 4, 0.23)
+        };
 
-        console.log("gosling #", childNumber, "is at", this.position.x, this.position.y);
-        console.log("gosling trailing distance is", this.trailingDistance);
+        this.setState(Gosling.STATES.FOLLOW_PARENT);
     }
 
     /**
@@ -149,7 +164,6 @@ class Gosling {
         this.previousState = this.currentState;
 
         if (this.currentState?.exit) {
-            // console.log("Exiting current state: ", this.currentState);
             this.currentState.exit();
         }
 
@@ -161,7 +175,6 @@ class Gosling {
         }
 
         if (this.currentState?.enter) {
-            // console.log("Entering new state: ", this.currentState);
             this.currentState.enter();
         }
     }
@@ -171,9 +184,6 @@ class Gosling {
     }
 
     growUp() {
-        console.log("gosling has grown up!");
-
-
         // this.setState(Gosling.STATES.IDLE_NEAR_PARENT);
         // this.kill();
 
@@ -183,6 +193,15 @@ class Gosling {
 
     kill() {
         this.removeFromCanvas = true;
+    }
+
+    freeze() {
+        this.frozen = true;
+        this.setState(Gosling.STATES.IDLE);
+    }
+
+    unfreeze() {
+        this.frozen = false;
     }
 
     // === UPDATE/DRAW LOOP METHODS ===
@@ -220,14 +239,12 @@ class Gosling {
 
     draw() {
         this.currentAnimation.drawFrame(this.position.x, this.position.y, this.facing);
-
-        
     }
     
     // === CLASS CONSTANTS ===
 
     static get SPRITESHEET() {
-        return "/images/sprites/gosling.png";
+        return "/images/entities/gosling.png";
     }
 
     static get SCALE() {
@@ -251,16 +268,11 @@ class Gosling {
         return sfxPaths[Math.floor(Math.random() * sfxPaths.length)];
     }
 
-    static ANIMATIONS = {
-        BOBBING: new Animator(0, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 2, 0.7),
-        WALKING: new Animator(1, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 4, 0.2),
-        RUNNING: new Animator(2, Gosling.SPRITESHEET, Gosling.FRAME_SIZE, Gosling.SCALE, 4, 0.15)
-    }
-
     static STATES = {
-        IDLE: NothingState,
-        CHASE_PARENT: ChaseParentState,
-        FOLLOW_PARENT: FollowParentState,
+        IDLE: GoslingNothingState,
+        CHASE_PARENT: GoslingChaseState,
+        FOLLOW_PARENT: GoslingFollowState,
+        DANCE: GoslingDanceState,
     }
 }
 

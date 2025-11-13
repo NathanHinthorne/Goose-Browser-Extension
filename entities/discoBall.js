@@ -33,7 +33,7 @@ class DiscoBall {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/disco-ball.png";
+        return "/images/entities/disco-ball.png";
     }
 
     static get SFX() {

@@ -58,7 +58,7 @@ class Mud {
     }
 
   static get SPRITESHEET() {
-    return "/images/sprites/mud.png";
+    return "/images/entities/mud.png";
   }
 
   static get SCALE() {

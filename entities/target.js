@@ -30,7 +30,7 @@ class Target {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/target.png";
+        return "/images/entities/target.png";
     }
 
     static get SCALE() {

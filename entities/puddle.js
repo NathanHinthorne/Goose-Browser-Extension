@@ -58,7 +58,7 @@ class Puddle {
     }
 
     static get SPRITESHEET() {
-        return "/images/sprites/puddle.png";
+        return "/images/entities/puddle.png";
     }
 
     static get SFX() {
