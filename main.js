@@ -16,7 +16,7 @@ function initializeEnvironment() {
   if (isInitialized) return;
 
   // load via chrome API
-  const fullPath = browser.runtime.getURL('fonts/Silkscreen-Regular.ttf');
+  const fullPath = chrome.runtime.getURL('fonts/Silkscreen-Regular.ttf');
   const pixelFont = new FontFace('Silkscreen', 'url(' + fullPath + ')');
 
   pixelFont.load().then(function (font) {
@@ -40,21 +40,8 @@ function initializeEnvironment() {
   CANVAS.style.height = '100vh';
   CANVAS.style.zIndex = '9999';
   CANVAS.style.pointerEvents = 'none'; // Prevent blocking user interaction
-  CANVAS.id = 'goose-canvas'; // Add ID for debugging
 
-  // Ensure document.body exists before appending
-  if (!document.body) {
-    console.error('document.body not available yet');
-    return;
-  }
   document.body.appendChild(CANVAS);
-
-  if (DEBUG_MODE) {
-    console.log('Canvas created and appended to body');
-    console.log('Canvas dimensions:', CANVAS.width, 'x', CANVAS.height);
-    console.log('Canvas style:', CANVAS.style.cssText);
-    console.log('Canvas z-index:', window.getComputedStyle(CANVAS).zIndex);
-  }
 
   /** The tool we use to draw on CANVAS. */
   CTX = CANVAS.getContext("2d", {
@@ -151,7 +138,7 @@ function queueAssets() {
 
 // ====== GOOSE INITIALIZATION =======
 
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Only process messages in the main frame
   if (window !== window.top) {
     if (DEBUG_MODE) {
@@ -177,55 +164,17 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
 
     case "startGoose":
-      if (DEBUG_MODE) {
-        console.log('startGoose command received');
-        console.log('Assets done:', ASSET_MGR.isDone());
-        console.log('Engine running:', ENGINE.running);
-        console.log('Canvas exists:', !!CANVAS);
-        console.log('Canvas in DOM:', document.body.contains(CANVAS));
-      }
-
-      // Ensure assets are loaded before starting
-      if (!ASSET_MGR.isDone()) {
-        if (DEBUG_MODE) console.log('Downloading assets...');
-        ASSET_MGR.downloadAll(() => {
-          if (DEBUG_MODE) console.log('Assets downloaded, starting engine and goose');
-          if (!ENGINE.running) {
-            ENGINE.start();
-          }
-          ENGINE.addEntity(new Goose());
-          Goose.instance.setState(Goose.STATES.WANDER);
-          // Only set storage if sender.tab exists (message came from a tab)
-          if (sender.tab && sender.tab.id) {
-            browser.storage.local.set({ [`gooseActive_${sender.tab.id}`]: true });
-          }
-          if (DEBUG_MODE) console.log('Goose started successfully');
-          sendResponse({ status: "startedGoose" });
-        });
-      } else {
-        if (DEBUG_MODE) console.log('Assets already loaded, starting goose');
-        if (!ENGINE.running) {
-          ENGINE.start();
-        }
-        ENGINE.addEntity(new Goose());
-        Goose.instance.setState(Goose.STATES.WANDER);
-        // Only set storage if sender.tab exists (message came from a tab)
-        if (sender.tab && sender.tab.id) {
-          browser.storage.local.set({ [`gooseActive_${sender.tab.id}`]: true });
-        }
-        if (DEBUG_MODE) console.log('Goose started successfully');
-        sendResponse({ status: "startedGoose" });
-      }
+      ENGINE.addEntity(new Goose());
+      Goose.instance.setState(Goose.STATES.WANDER);
+      chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: true });
+      sendResponse({ status: "startedGoose" });
       break;
 
     case "stopGoose":
       // erase everything from the ctx
       CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
       Goose.instance.kill();
-      // Only set storage if sender.tab exists (message came from a tab)
-      if (sender.tab && sender.tab.id) {
-        browser.storage.local.set({ [`gooseActive_${sender.tab.id}`]: false });
-      }
+      chrome.storage.local.set({ [`gooseActive_${sender.tab.id}`]: false });
       sendResponse({ status: "stoppedGoose" });
       break;
 

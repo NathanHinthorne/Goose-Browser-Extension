@@ -49,8 +49,8 @@ class AssetManager {
 
             const ext = path.substring(path.length - 3);
 
-            // Use browser.runtime.getURL to get the full path to the asset
-            const fullPath = browser.runtime.getURL(path);
+            // Use chrome.runtime.getURL to get the full path to the asset
+            const fullPath = chrome.runtime.getURL(path);
 
             switch (ext) {
                 case 'jpg':
@@ -120,15 +120,13 @@ class AssetManager {
     playAudio(path, volume = 1.00) {
         const audio = this.cache[path];
         if (!audio) {
-            console.warn(`Audio asset not yet loaded: ${path}`);
+            console.error(`Audio asset not found in cache: ${path}`);
             return;
         }
         audio.currentTime = 0;
         audio.volume = volume;
 
-        audio.play().catch(err => {
-            console.warn(`Failed to play audio ${path}:`, err);
-        });
+        audio.play();
         this.playingAudio.push(audio);
 
         audio.addEventListener('ended', () => {

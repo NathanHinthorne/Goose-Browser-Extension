@@ -19,11 +19,9 @@ extpay.getUser().then(user => {
         
         // Show unlocked buttons
         document.getElementById('hatsButton').style.display = 'block';
-        document.getElementById('hatsButtonLocked').style.display = 'none';
         document.getElementById('statesButton').style.display = 'block';
+        document.getElementById('hatsButtonLocked').style.display = 'none';
         document.getElementById('statesButtonLocked').style.display = 'none';
-        document.getElementById('layEggButton').style.display = 'block';
-        document.getElementById('layEggButtonLocked').style.display = 'none';
     } else {
         // User doesn't have premium - show payment UI
         document.getElementById('premiumContainer').style.display = 'block';
@@ -32,11 +30,9 @@ extpay.getUser().then(user => {
         
         // Show locked buttons
         document.getElementById('hatsButton').style.display = 'none';
+        document.getElementById('statesButton').style.display = 'none';
         document.getElementById('hatsButtonLocked').style.display = 'block';
-        document.getElementById('statesButton').style.display = 'block'; // enable states button, even for free users
-        document.getElementById('statesButtonLocked').style.display = 'none';
-        document.getElementById('layEggButton').style.display = 'none';
-        document.getElementById('layEggButtonLocked').style.display = 'block';
+        document.getElementById('statesButtonLocked').style.display = 'block';
     }
 }).catch(err => {
     // Show payment UI on error
@@ -50,10 +46,10 @@ extpay.onPaid.addListener(() => {
 });
 
 document.getElementById('startButton').addEventListener('click', () => {
-    browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         const tabId = tabs[0].id;
-        browser.tabs.sendMessage(tabId, {command: "startGoose"});
-        browser.storage.local.set({ [`gooseActive_${tabId}`]: true }, () => {
+        chrome.tabs.sendMessage(tabId, {command: "startGoose"});
+        chrome.storage.local.set({ [`gooseActive_${tabId}`]: true }, () => {
             document.getElementById('stopButton').disabled = false;
             document.getElementById('startButton').disabled = true;
             document.getElementById('hatsButton').disabled = false;
@@ -64,10 +60,10 @@ document.getElementById('startButton').addEventListener('click', () => {
 });
 
 document.getElementById('stopButton').addEventListener('click', () => {
-    browser.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
         const tabId = tabs[0].id;
-        browser.tabs.sendMessage(tabId, {command: "stopGoose"});
-        browser.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
+        chrome.tabs.sendMessage(tabId, {command: "stopGoose"});
+        chrome.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
             document.getElementById('stopButton').disabled = true;
             document.getElementById('startButton').disabled = false;
             document.getElementById('hatsButton').disabled = true;
@@ -80,7 +76,7 @@ document.getElementById('stopButton').addEventListener('click', () => {
 
                         
 // When popup opens, check the goose state and state swapper state
-browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     const tabId = tabs[0].id;
     const url = tabs[0].url;
 
@@ -106,10 +102,10 @@ browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         document.getElementById('statesButton').disabled = true;
     } else {
         // Check if goose is actually running by sending a message
-        browser.tabs.sendMessage(tabId, { command: "checkGooseStatus" }, (response) => {
-            if (browser.runtime.lastError || !response || !response.isActive) {
+        chrome.tabs.sendMessage(tabId, { command: "checkGooseStatus" }, (response) => {
+            if (chrome.runtime.lastError || !response || !response.isActive) {
                 // Goose is not running, reset storage and UI
-                browser.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
+                chrome.storage.local.set({ [`gooseActive_${tabId}`]: false }, () => {
                     setInactiveState();
                 });
             } else {
@@ -118,7 +114,7 @@ browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             }
             
             // Set toggle state regardless
-            browser.storage.local.get([`stateSwapperEnabled_${tabId}`], (result) => {
+            chrome.storage.local.get([`stateSwapperEnabled_${tabId}`], (result) => {
                 const toggleButton = document.getElementById('statesButton');
                 if (result[`stateSwapperEnabled_${tabId}`]) {
                     toggleButton.classList.add('checked');
@@ -158,9 +154,9 @@ document.getElementById('hatsButton').addEventListener('click', () => {
 document.querySelectorAll('.hat-square-button').forEach(button => {
     button.addEventListener('click', (event) => {
         const hatType = parseInt(event.currentTarget.dataset.hat);
-        browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const tabId = tabs[0].id;
-            browser.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
+            chrome.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
         });
         // Hide panel after selection
         document.getElementById('hatsPanel').style.display = 'none';
@@ -169,9 +165,9 @@ document.querySelectorAll('.hat-square-button').forEach(button => {
     //? Leave this in or take it out?
     // button.addEventListener('mouseover', (event) => {
     //     const hatType = parseInt(event.currentTarget.dataset.hat);
-    //     browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     //         const tabId = tabs[0].id;
-    //         browser.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
+    //         chrome.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
     //     });
     // });
 });
@@ -190,11 +186,9 @@ document.getElementById('statesButton').addEventListener('click', () => {
 document.querySelectorAll('.state-square-button').forEach(button => {
     button.addEventListener('click', (event) => {
         const stateName = event.currentTarget.dataset.state;
-        if (stateName == "NONE") return;
-        
-        browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const tabId = tabs[0].id;
-            browser.tabs.sendMessage(tabId, { command: "changeState", stateName: stateName });
+            chrome.tabs.sendMessage(tabId, { command: "changeState", stateName: stateName });
         });
         // Hide panel after selection
         document.getElementById('statesPanel').style.display = 'none';

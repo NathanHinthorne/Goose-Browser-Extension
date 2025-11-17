@@ -639,7 +639,7 @@ class DragMemesState extends GooseState {
     const meme = document.createElement('img');
     const imagePath = this.goose.shuffled_memes[this.goose.memeIndex];
     this.goose.memeIndex++;
-    meme.src = browser.runtime.getURL(imagePath);
+    meme.src = chrome.runtime.getURL(imagePath);
     meme.className = 'goose-meme';
     meme.style.position = 'fixed';
     meme.style.zIndex = '9998';
@@ -647,7 +647,7 @@ class DragMemesState extends GooseState {
 
     // Force a reload by adding a timestamp query parameter, getting around caching
     // This ensures a fresh image is loaded each time
-    meme.src = browser.runtime.getURL(imagePath) + '?t=' + Date.now();
+    meme.src = chrome.runtime.getURL(imagePath) + '?t=' + Date.now();
     
     return meme;
   }
@@ -808,6 +808,22 @@ class Goose {
 
   setAnimation(animation) {
     this.currentAnimation = animation;
+
+    const bendingDownAnimations = [
+      Goose.ANIMATIONS.LAYING_EGG,
+      Goose.ANIMATIONS.SWIMMING,
+      Goose.ANIMATIONS.RUNNING,
+      Goose.ANIMATIONS.ANGRY,
+      Goose.ANIMATIONS.BITING,
+      Goose.ANIMATIONS.DRAGGING
+    ];
+
+    // temp until head pos system is implemented
+    if (bendingDownAnimations.includes(animation)) {
+      this.isBendingDown = true;
+    } else {
+      this.isBendingDown = false;
+    }
   }
 
 

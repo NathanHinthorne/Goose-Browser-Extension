@@ -120,6 +120,7 @@ class GameEngine {
      */
     draw() {
         CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
         this.entities.background.forEach((entity) => { entity.draw(); });
         this.entities.midground.forEach((entity) => { entity.draw(); });
         this.entities.foreground.forEach((entity) => { entity.draw(); });
