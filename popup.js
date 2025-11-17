@@ -19,9 +19,11 @@ extpay.getUser().then(user => {
         
         // Show unlocked buttons
         document.getElementById('hatsButton').style.display = 'block';
-        document.getElementById('statesButton').style.display = 'block';
         document.getElementById('hatsButtonLocked').style.display = 'none';
+        document.getElementById('statesButton').style.display = 'block';
         document.getElementById('statesButtonLocked').style.display = 'none';
+        document.getElementById('layEggButton').style.display = 'block';
+        document.getElementById('layEggButtonLocked').style.display = 'none';
     } else {
         // User doesn't have premium - show payment UI
         document.getElementById('premiumContainer').style.display = 'block';
@@ -30,9 +32,11 @@ extpay.getUser().then(user => {
         
         // Show locked buttons
         document.getElementById('hatsButton').style.display = 'none';
-        document.getElementById('statesButton').style.display = 'none';
         document.getElementById('hatsButtonLocked').style.display = 'block';
-        document.getElementById('statesButtonLocked').style.display = 'block';
+        document.getElementById('statesButton').style.display = 'block'; // enable states button, even for free users
+        document.getElementById('statesButtonLocked').style.display = 'none';
+        document.getElementById('layEggButton').style.display = 'none';
+        document.getElementById('layEggButtonLocked').style.display = 'block';
     }
 }).catch(err => {
     // Show payment UI on error
@@ -186,6 +190,8 @@ document.getElementById('statesButton').addEventListener('click', () => {
 document.querySelectorAll('.state-square-button').forEach(button => {
     button.addEventListener('click', (event) => {
         const stateName = event.currentTarget.dataset.state;
+        if (stateName == "NONE") return;
+        
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const tabId = tabs[0].id;
             chrome.tabs.sendMessage(tabId, { command: "changeState", stateName: stateName });

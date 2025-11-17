@@ -808,22 +808,6 @@ class Goose {
 
   setAnimation(animation) {
     this.currentAnimation = animation;
-
-    const bendingDownAnimations = [
-      Goose.ANIMATIONS.LAYING_EGG,
-      Goose.ANIMATIONS.SWIMMING,
-      Goose.ANIMATIONS.RUNNING,
-      Goose.ANIMATIONS.ANGRY,
-      Goose.ANIMATIONS.BITING,
-      Goose.ANIMATIONS.DRAGGING
-    ];
-
-    // temp until head pos system is implemented
-    if (bendingDownAnimations.includes(animation)) {
-      this.isBendingDown = true;
-    } else {
-      this.isBendingDown = false;
-    }
   }
 
 

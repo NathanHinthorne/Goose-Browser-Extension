@@ -3,12 +3,6 @@ importScripts('ExtPay.js');
 const extPay = ExtPay('annoying-goose'); 
 extPay.startBackground();
 
-// temp
-extPay.getUser().then(user => {
-  console.log(user);
-});
-
-
 // fires when the extension is first installed or updated
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
