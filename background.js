@@ -3,25 +3,20 @@ importScripts('ExtPay.js');
 const extPay = ExtPay('annoying-goose'); 
 extPay.startBackground();
 
-// temp
-extPay.getUser().then(user => {
-  console.log(user);
-});
-
 
 // fires when the extension is first installed or updated
-chrome.runtime.onInstalled.addListener(() => {
+browser.runtime.onInstalled.addListener(() => {
   console.log('Extension installed');
   triggerExtensionStartup();
 });
 
 // fires when entire browser first starts up
-chrome.runtime.onStartup.addListener(() => {
+browser.runtime.onStartup.addListener(() => {
   console.log('Browser started');
   triggerExtensionStartup();
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // React to tab updates
   if (changeInfo.status === 'complete') {
     // Tab finished loading
@@ -33,10 +28,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 function triggerExtensionStartup() {
   console.log('triggerExtensionStartup() called');
   // Query for all tabs and send message to each
-  chrome.tabs.query({}, (tabs) => {
+  browser.tabs.query({}, (tabs) => {
     tabs.forEach(tab => {
-      chrome.tabs.sendMessage(tab.id, { command: "extensionStartup" }, (response) => {
-        if (chrome.runtime.lastError) {
+      browser.tabs.sendMessage(tab.id, { command: "extensionStartup" }, (response) => {
+        if (browser.runtime.lastError) {
           console.log(`Tab ${tab.id} not ready yet`);
           return;
         }
@@ -47,7 +42,7 @@ function triggerExtensionStartup() {
 }
 
 async function getCurrentTab() {
-  const [tab] = await chrome.tabs.query({
+  const [tab] = await browser.tabs.query({
     active: true,
     currentWindow: true
   });

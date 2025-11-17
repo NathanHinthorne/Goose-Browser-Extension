@@ -572,17 +572,22 @@
                 <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Drag Memes">
                 <img src="images/ui/state-preview-drag-memes.png" class="state-preview" alt="Drag Memes Preview">
             </button>
-            <button class="state-square-button" data-state="LAY_EGG">
+            <button id="layEggButton" class="state-square-button" data-state="LAY_EGG" style="display: none;">
                 <img src="images/ui/square-button-default.png" class="button-frame default" alt="Lay Egg">
                 <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Lay Egg">
                 <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Lay Egg">
                 <img src="images/ui/state-preview-lay-egg.png" class="state-preview" alt="Lay Egg Preview">
             </button>
+            <button id="layEggButtonLocked" class="state-square-button" data-state="NONE" style="display: none;">
+                <img src="images/ui/square-button-locked-default.png" class="button-frame default" alt="Lay Egg">
+                <img src="images/ui/square-button-locked-default.png" class="button-frame hovered" alt="Lay Egg">
+                <img src="images/ui/square-button-locked-default.png" class="button-frame clicked" alt="Lay Egg">
+            </button>
         </div>
     </div>
 
     <div id="premiumContainer" style="display: none;">
-        <p>Give the goose hats, control its actions, and unlock baby goslings!</p>
+        <p>Give the goose hats and unlock baby goslings!</p>
         <button id="premiumButton" class="custom-button">
             <img src="images/ui/premium-default.png" class="button-frame default">
             <img src="images/ui/premium-hovered.png" class="button-frame hovered">
