@@ -952,58 +952,58 @@ class Goose {
   */
   static ANIMATIONS = {
     BOBBING: (() => {
-      const anime = new Animator(0, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.7);
-      anime.headAnchors = [
+      const animator = new Animator(0, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.7);
+      animator.headAnchors = [
         {x: 10, y: -30}, // frame 0
         {x: 10, y: -28}  // frame 1
       ];
-      return anime;
+      return animator;
     })(),
     LOOKING_AROUND: (() => {
-      const anime = new Animator(1, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.7, false);
-      anime.headAnchors = [
+      const animator = new Animator(1, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.7, false);
+      animator.headAnchors = [
         {x: 10, y: -32}, // frame 0
         {x: 10, y: -32}, // frame 1
         {x: 10, y: -32}  // frame 2
       ];
-      return anime;
+      return animator;
     })(),
     LOOKING_UP: (() => {
-      const anime = new Animator(2, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 1, 0.7, false);
-      anime.headAnchors = [
+      const animator = new Animator(2, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 1, 0.7, false);
+      animator.headAnchors = [
         {x: 10, y: -32}  // frame 0
       ];
-      return anime;
+      return animator;
     })(),
     WALKING: (() => {
-      const anime = new Animator(3, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
-      anime.headAnchors = [
+      const animator = new Animator(3, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      animator.headAnchors = [
         {x: 10, y: -30}, // frame 1
         {x: 10, y: -30}, // frame 2
         {x: 10, y: -30},  // frame 3
         {x: 10, y: -30}, // frame 0
       ];
-      return anime;
+      return animator;
     })(),
     RUNNING: (() => {
-      const anime = new Animator(4, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
-      anime.headAnchors = [
+      const animator = new Animator(4, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      animator.headAnchors = [
         {x: 18, y: -20}, // frame 0
         {x: 18, y: -20}, // frame 1
         {x: 18, y: -20}, // frame 2
         {x: 18, y: -20}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     FLYING: (() => {
-      const anime = new Animator(5, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
-      anime.headAnchors = [
+      const animator = new Animator(5, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      animator.headAnchors = [
         {x: 10, y: -32}, // frame 0
         {x: 10, y: -31}, // frame 1
         {x: 10, y: -32}, // frame 2
         {x: 10, y: -30}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     SWIMMING: (() => {
       const anime = new Animator(6, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.5);
@@ -1014,69 +1014,69 @@ class Goose {
       return anime;
     })(),
     SHOOED: (() => {
-      const anime = new Animator(7, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
-      anime.headAnchors = [
+      const animator = new Animator(7, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      animator.headAnchors = [
         {x: 10, y: -32}, // frame 0
         {x: 10, y: -32}, // frame 1
         {x: 10, y: -32}, // frame 2
         {x: 10, y: -32}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     DANCING: (() => {
-      const anime = new Animator(8, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.23);
-      anime.headAnchors = [
+      const animator = new Animator(8, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.23);
+      animator.headAnchors = [
         {x: -2, y: -32}, // frame 0
         {x: 18, y: -10}, // frame 1
         {x: 22, y: 10}, // frame 2
         {x: 18, y: -10}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     ANGRY: (() => {
-      const anime = new Animator(9, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
-      anime.headAnchors = [
+      const animator = new Animator(9, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.15);
+      animator.headAnchors = [
         {x: 20, y: -15}, // frame 0
         {x: 18, y: -13}, // frame 1
         {x: 20, y: -15}, // frame 2
         {x: 18, y: -13}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     LAYING_EGG: (() => {
-      const anime = new Animator(10, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.8);
-      anime.headAnchors = [
+      const animator = new Animator(10, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.8);
+      animator.headAnchors = [
         {x: 10, y: -14},  // frame 1
         {x: 10, y: -14}, // frame 0
       ];
-      return anime;
+      return animator;
     })(),
     DRAGGING: (() => {
-      const anime = new Animator(11, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
-      anime.headAnchors = [
+      const animator = new Animator(11, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 4, 0.2);
+      animator.headAnchors = [
         {x: 18, y: 8}, // frame 0
         {x: 16, y: 6}, // frame 1
         {x: 18, y: 8}, // frame 2
         {x: 16, y: 6}  // frame 3
       ];
-      return anime;
+      return animator;
     })(),
     BITING: (() => {
-      const anime = new Animator(12, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.2, false);
-      anime.headAnchors = [
+      const animator = new Animator(12, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 2, 0.2, false);
+      animator.headAnchors = [
         {x: 20, y: 0}, // frame 0
         {x: 20, y: 0}, // frame 1
       ];
-      return anime;
+      return animator;
     })(),
     BONKING: (() => {
-      const anime = new Animator(13, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.1, false);
-      anime.headAnchors = [
+      const animator = new Animator(13, Goose.SPRITESHEET, Goose.FRAME_SIZE, Goose.SCALE, 3, 0.1, false);
+      animator.headAnchors = [
         {x: 0, y: -30}, // frame 0
         {x: 0, y: -34}, // frame 1
         {x: 0, y: -30}  // frame 2
       ];
-      return anime;
+      return animator;
     })()
   }
 

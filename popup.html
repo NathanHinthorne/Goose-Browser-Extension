@@ -144,6 +144,13 @@
             text-align: center;
         }
 
+        #comingSoon {
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
         #startButton,
         #stopButton {
             width: 280px;
@@ -519,6 +526,12 @@
                 <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 15">
                 <div class="hat-preview" style="background-position: 0 -560px;"></div>
             </button>
+            <button class="hat-square-button" data-hat="15">
+                <img src="images/ui/square-button-default.png" class="button-frame default" alt="Hat 16">
+                <img src="images/ui/square-button-hovered.png" class="button-frame hovered" alt="Hat 16">
+                <img src="images/ui/square-button-clicked.png" class="button-frame clicked" alt="Hat 16">
+                <div class="hat-preview" style="background-position: 0 -600px;"></div>
+            </button>
         </div>
     </div>
 
@@ -614,13 +627,17 @@
         <p>Experiencing issues? Contact the developer at:</p>
         <p><a href="mailto:skywardappstudio@gmail.com" style="color: var(--primary-color); text-decoration: underline;">skywardappstudio@gmail.com</a></p>
     </div>
-
+    
     <div id="coffeeContainer" class="coffee-container" style="display: none;">
         <a href="https://www.buymeacoffee.com/nathanrh85d" target="_blank">
             <img src="./images/ui/bmc-button.svg" alt="Buy Me A Coffee">
         </a>
     </div>
-
+    
+    <div id="comingSoon">
+        <p>NEW EXTENSION COMING SOON!</p>
+        <img src="images/ui/happy-hummer-logo.png" alt="Happy Hummer Logo">
+    </div>
 
     <script src="ExtPay.js"></script>
     <script src="popup.js"></script>

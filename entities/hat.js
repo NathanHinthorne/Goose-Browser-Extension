@@ -87,6 +87,7 @@ class Hat {
             POLICE: 12,
             U_WASHINGTON: 13,
             JESTER: 14,
+            DEVIL_HORNS: 15
         };
     }
 }
