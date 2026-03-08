@@ -165,15 +165,6 @@ document.querySelectorAll('.hat-square-button').forEach(button => {
         // Hide panel after selection
         document.getElementById('hatsPanel').style.display = 'none';
     });
-
-    //? Leave this in or take it out?
-    // button.addEventListener('mouseover', (event) => {
-    //     const hatType = parseInt(event.currentTarget.dataset.hat);
-    //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //         const tabId = tabs[0].id;
-    //         chrome.tabs.sendMessage(tabId, { command: "changeHat", hatType: hatType });
-    //     });
-    // });
 });
 
 document.getElementById('statesButton').addEventListener('click', () => {
