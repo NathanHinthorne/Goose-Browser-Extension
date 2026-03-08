@@ -915,6 +915,8 @@ class Goose {
       HONK1: "/audio/honk1.mp3",
       HONK2: "/audio/honk2.mp3",
       HONK3: "/audio/honk3.mp3",
+      HONK4: "/audio/honk4.mp3",
+      HONK5: "/audio/honk5.mp3",
       HONK_ECHO: "/audio/honk-echo.mp3",
       SLAP: "/audio/slap.mp3",
       BITE: "/audio/bite.mp3",
@@ -924,6 +926,11 @@ class Goose {
 
   static RANDOM_HONK_SFX() {
     const sfxPaths = [Goose.SFX.HONK1, Goose.SFX.HONK2, Goose.SFX.HONK3];
+    return sfxPaths[Math.floor(Math.random() * sfxPaths.length)];
+  }
+
+  static get RANDOM_ALT_HONK_SFX() {
+    const sfxPaths = [Goose.SFX.HONK4, Goose.SFX.HONK5];
     return sfxPaths[Math.floor(Math.random() * sfxPaths.length)];
   }
 

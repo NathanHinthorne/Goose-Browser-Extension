@@ -44,6 +44,8 @@ class Hat {
     setHatType(hatType) {
         this.hatType = hatType;
 
+        ASSET_MGR.playAudio(Goose.RANDOM_ALT_HONK_SFX());
+
         if (this.hatType !== Hat.HAT_TYPES.NONE) {
             ENGINE.addEntity(new TextBox(Goose.instance, TextBox.RANDOM_NEW_HAT_TEXT), GameEngine.DEPTH.FOREGROUND);
         } else {
