@@ -181,7 +181,6 @@ class TextBox {
             "I successfully wasted your time.",
             "This goose is on the loose.",
             "HEY! I own this computer. Leave.",
-            "You are a non-refundable gift to the world."
         ];
 
         return texts[Math.floor(Math.random() * texts.length)];
